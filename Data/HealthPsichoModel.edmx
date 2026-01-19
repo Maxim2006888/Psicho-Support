@@ -1,0 +1,673 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="Хранилище HealthPsicho_DBModel" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Achievements">
+          <Key>
+            <PropertyRef Name="AchievementID" />
+          </Key>
+          <Property Name="AchievementID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Title" Type="nvarchar" MaxLength="100" />
+          <Property Name="Description" Type="nvarchar" MaxLength="300" />
+          <Property Name="IconPath" Type="nvarchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="AppUsageStats">
+          <Key>
+            <PropertyRef Name="StatID" />
+          </Key>
+          <Property Name="StatID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="StartTime" Type="datetime" />
+          <Property Name="EndTime" Type="datetime" />
+          <Property Name="TotalMinutes" Type="int" />
+        </EntityType>
+        <EntityType Name="Emotions">
+          <Key>
+            <PropertyRef Name="EmotionID" />
+          </Key>
+          <Property Name="EmotionID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="Mood" Type="int" />
+          <Property Name="Energy" Type="int" />
+          <Property Name="Anxiety" Type="int" />
+          <Property Name="Date" Type="date" />
+        </EntityType>
+        <EntityType Name="Notes">
+          <Key>
+            <PropertyRef Name="NoteID" />
+          </Key>
+          <Property Name="NoteID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="Title" Type="nvarchar" MaxLength="100" />
+          <Property Name="Content" Type="nvarchar(max)" />
+          <Property Name="Mood" Type="int" />
+          <Property Name="StressLevel" Type="int" />
+          <Property Name="CreatedAt" Type="datetime" />
+        </EntityType>
+        <EntityType Name="PsychoTypes">
+          <Key>
+            <PropertyRef Name="PsychoTypeID" />
+          </Key>
+          <Property Name="PsychoTypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="TypeName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="500" />
+        </EntityType>
+        <EntityType Name="SleepSessions">
+          <Key>
+            <PropertyRef Name="SleepID" />
+          </Key>
+          <Property Name="SleepID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="HoursSlept" Type="float" />
+          <Property Name="SleepQuality" Type="int" />
+          <Property Name="Date" Type="date" />
+        </EntityType>
+        <EntityType Name="TestResults">
+          <Key>
+            <PropertyRef Name="ResultID" />
+          </Key>
+          <Property Name="ResultID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="TestID" Type="int" Nullable="false" />
+          <Property Name="Score" Type="int" />
+          <Property Name="Date" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Tests">
+          <Key>
+            <PropertyRef Name="TestID" />
+          </Key>
+          <Property Name="TestID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="TestName" Type="nvarchar" MaxLength="100" />
+          <Property Name="Description" Type="nvarchar" MaxLength="500" />
+        </EntityType>
+        <EntityType Name="UserAchievements">
+          <Key>
+            <PropertyRef Name="UserAchievementID" />
+          </Key>
+          <Property Name="UserAchievementID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="AchievementID" Type="int" Nullable="false" />
+          <Property Name="DateEarned" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Users">
+          <Key>
+            <PropertyRef Name="UserID" />
+          </Key>
+          <Property Name="UserID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Username" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="PasswordHash" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="PsychoTypeID" Type="int" />
+          <Property Name="CreatedAt" Type="datetime" />
+        </EntityType>
+        <Association Name="FK_AppUsageStats_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="AppUsageStats" Type="Self.AppUsageStats" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="AppUsageStats">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Emotions_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Emotions" Type="Self.Emotions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="Emotions">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Notes_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Notes" Type="Self.Notes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="Notes">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SleepSessions_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="SleepSessions" Type="Self.SleepSessions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="SleepSessions">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TestResults_Tests">
+          <End Role="Tests" Type="Self.Tests" Multiplicity="1" />
+          <End Role="TestResults" Type="Self.TestResults" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tests">
+              <PropertyRef Name="TestID" />
+            </Principal>
+            <Dependent Role="TestResults">
+              <PropertyRef Name="TestID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TestResults_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="TestResults" Type="Self.TestResults" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="TestResults">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserAchievements_Achievements">
+          <End Role="Achievements" Type="Self.Achievements" Multiplicity="1" />
+          <End Role="UserAchievements" Type="Self.UserAchievements" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Achievements">
+              <PropertyRef Name="AchievementID" />
+            </Principal>
+            <Dependent Role="UserAchievements">
+              <PropertyRef Name="AchievementID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserAchievements_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="UserAchievements" Type="Self.UserAchievements" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="UserAchievements">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_PsychoTypes">
+          <End Role="PsychoTypes" Type="Self.PsychoTypes" Multiplicity="0..1" />
+          <End Role="Users" Type="Self.Users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PsychoTypes">
+              <PropertyRef Name="PsychoTypeID" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="PsychoTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="Хранилище HealthPsicho_DBModelContainer">
+          <EntitySet Name="Achievements" EntityType="Self.Achievements" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="AppUsageStats" EntityType="Self.AppUsageStats" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Emotions" EntityType="Self.Emotions" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Notes" EntityType="Self.Notes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PsychoTypes" EntityType="Self.PsychoTypes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SleepSessions" EntityType="Self.SleepSessions" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TestResults" EntityType="Self.TestResults" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Tests" EntityType="Self.Tests" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UserAchievements" EntityType="Self.UserAchievements" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_AppUsageStats_Users" Association="Self.FK_AppUsageStats_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="AppUsageStats" EntitySet="AppUsageStats" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Emotions_Users" Association="Self.FK_Emotions_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Emotions" EntitySet="Emotions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Notes_Users" Association="Self.FK_Notes_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Notes" EntitySet="Notes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SleepSessions_Users" Association="Self.FK_SleepSessions_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="SleepSessions" EntitySet="SleepSessions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TestResults_Tests" Association="Self.FK_TestResults_Tests">
+            <End Role="Tests" EntitySet="Tests" />
+            <End Role="TestResults" EntitySet="TestResults" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TestResults_Users" Association="Self.FK_TestResults_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="TestResults" EntitySet="TestResults" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserAchievements_Achievements" Association="Self.FK_UserAchievements_Achievements">
+            <End Role="Achievements" EntitySet="Achievements" />
+            <End Role="UserAchievements" EntitySet="UserAchievements" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserAchievements_Users" Association="Self.FK_UserAchievements_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="UserAchievements" EntitySet="UserAchievements" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_PsychoTypes" Association="Self.FK_Users_PsychoTypes">
+            <End Role="PsychoTypes" EntitySet="PsychoTypes" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="HealthPsicho_DBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Achievements">
+          <Key>
+            <PropertyRef Name="AchievementID" />
+          </Key>
+          <Property Name="AchievementID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Title" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="300" FixedLength="false" Unicode="true" />
+          <Property Name="IconPath" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="UserAchievements" Relationship="Self.FK_UserAchievements_Achievements" FromRole="Achievements" ToRole="UserAchievements" />
+        </EntityType>
+        <EntityType Name="AppUsageStats">
+          <Key>
+            <PropertyRef Name="StatID" />
+          </Key>
+          <Property Name="StatID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="StartTime" Type="DateTime" Precision="3" />
+          <Property Name="EndTime" Type="DateTime" Precision="3" />
+          <Property Name="TotalMinutes" Type="Int32" />
+          <NavigationProperty Name="Users" Relationship="Self.FK_AppUsageStats_Users" FromRole="AppUsageStats" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Emotions">
+          <Key>
+            <PropertyRef Name="EmotionID" />
+          </Key>
+          <Property Name="EmotionID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="Mood" Type="Int32" />
+          <Property Name="Energy" Type="Int32" />
+          <Property Name="Anxiety" Type="Int32" />
+          <Property Name="Date" Type="DateTime" Precision="0" />
+          <NavigationProperty Name="Users" Relationship="Self.FK_Emotions_Users" FromRole="Emotions" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Notes">
+          <Key>
+            <PropertyRef Name="NoteID" />
+          </Key>
+          <Property Name="NoteID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="Title" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Content" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Mood" Type="Int32" />
+          <Property Name="StressLevel" Type="Int32" />
+          <Property Name="CreatedAt" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Users" Relationship="Self.FK_Notes_Users" FromRole="Notes" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="PsychoTypes">
+          <Key>
+            <PropertyRef Name="PsychoTypeID" />
+          </Key>
+          <Property Name="PsychoTypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="TypeName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Users" Relationship="Self.FK_Users_PsychoTypes" FromRole="PsychoTypes" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="SleepSessions">
+          <Key>
+            <PropertyRef Name="SleepID" />
+          </Key>
+          <Property Name="SleepID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="HoursSlept" Type="Double" />
+          <Property Name="SleepQuality" Type="Int32" />
+          <Property Name="Date" Type="DateTime" Precision="0" />
+          <NavigationProperty Name="Users" Relationship="Self.FK_SleepSessions_Users" FromRole="SleepSessions" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="TestResults">
+          <Key>
+            <PropertyRef Name="ResultID" />
+          </Key>
+          <Property Name="ResultID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="TestID" Type="Int32" Nullable="false" />
+          <Property Name="Score" Type="Int32" />
+          <Property Name="Date" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Tests" Relationship="Self.FK_TestResults_Tests" FromRole="TestResults" ToRole="Tests" />
+          <NavigationProperty Name="Users" Relationship="Self.FK_TestResults_Users" FromRole="TestResults" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Tests">
+          <Key>
+            <PropertyRef Name="TestID" />
+          </Key>
+          <Property Name="TestID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="TestName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="TestResults" Relationship="Self.FK_TestResults_Tests" FromRole="Tests" ToRole="TestResults" />
+        </EntityType>
+        <EntityType Name="UserAchievements">
+          <Key>
+            <PropertyRef Name="UserAchievementID" />
+          </Key>
+          <Property Name="UserAchievementID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="AchievementID" Type="Int32" Nullable="false" />
+          <Property Name="DateEarned" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Achievements" Relationship="Self.FK_UserAchievements_Achievements" FromRole="UserAchievements" ToRole="Achievements" />
+          <NavigationProperty Name="Users" Relationship="Self.FK_UserAchievements_Users" FromRole="UserAchievements" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Users">
+          <Key>
+            <PropertyRef Name="UserID" />
+          </Key>
+          <Property Name="UserID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Username" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="PasswordHash" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="PsychoTypeID" Type="Int32" />
+          <Property Name="CreatedAt" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="AppUsageStats" Relationship="Self.FK_AppUsageStats_Users" FromRole="Users" ToRole="AppUsageStats" />
+          <NavigationProperty Name="Emotions" Relationship="Self.FK_Emotions_Users" FromRole="Users" ToRole="Emotions" />
+          <NavigationProperty Name="Notes" Relationship="Self.FK_Notes_Users" FromRole="Users" ToRole="Notes" />
+          <NavigationProperty Name="PsychoTypes" Relationship="Self.FK_Users_PsychoTypes" FromRole="Users" ToRole="PsychoTypes" />
+          <NavigationProperty Name="SleepSessions" Relationship="Self.FK_SleepSessions_Users" FromRole="Users" ToRole="SleepSessions" />
+          <NavigationProperty Name="TestResults" Relationship="Self.FK_TestResults_Users" FromRole="Users" ToRole="TestResults" />
+          <NavigationProperty Name="UserAchievements" Relationship="Self.FK_UserAchievements_Users" FromRole="Users" ToRole="UserAchievements" />
+        </EntityType>
+        <Association Name="FK_UserAchievements_Achievements">
+          <End Role="Achievements" Type="Self.Achievements" Multiplicity="1" />
+          <End Role="UserAchievements" Type="Self.UserAchievements" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Achievements">
+              <PropertyRef Name="AchievementID" />
+            </Principal>
+            <Dependent Role="UserAchievements">
+              <PropertyRef Name="AchievementID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_AppUsageStats_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="AppUsageStats" Type="Self.AppUsageStats" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="AppUsageStats">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Emotions_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Emotions" Type="Self.Emotions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="Emotions">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Notes_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Notes" Type="Self.Notes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="Notes">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_PsychoTypes">
+          <End Role="PsychoTypes" Type="Self.PsychoTypes" Multiplicity="0..1" />
+          <End Role="Users" Type="Self.Users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PsychoTypes">
+              <PropertyRef Name="PsychoTypeID" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="PsychoTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SleepSessions_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="SleepSessions" Type="Self.SleepSessions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="SleepSessions">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TestResults_Tests">
+          <End Role="Tests" Type="Self.Tests" Multiplicity="1" />
+          <End Role="TestResults" Type="Self.TestResults" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tests">
+              <PropertyRef Name="TestID" />
+            </Principal>
+            <Dependent Role="TestResults">
+              <PropertyRef Name="TestID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TestResults_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="TestResults" Type="Self.TestResults" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="TestResults">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserAchievements_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="UserAchievements" Type="Self.UserAchievements" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="UserAchievements">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="HealthPsicho_DBEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Achievements" EntityType="Self.Achievements" />
+          <EntitySet Name="AppUsageStats" EntityType="Self.AppUsageStats" />
+          <EntitySet Name="Emotions" EntityType="Self.Emotions" />
+          <EntitySet Name="Notes" EntityType="Self.Notes" />
+          <EntitySet Name="PsychoTypes" EntityType="Self.PsychoTypes" />
+          <EntitySet Name="SleepSessions" EntityType="Self.SleepSessions" />
+          <EntitySet Name="TestResults" EntityType="Self.TestResults" />
+          <EntitySet Name="Tests" EntityType="Self.Tests" />
+          <EntitySet Name="UserAchievements" EntityType="Self.UserAchievements" />
+          <EntitySet Name="Users" EntityType="Self.Users" />
+          <AssociationSet Name="FK_UserAchievements_Achievements" Association="Self.FK_UserAchievements_Achievements">
+            <End Role="Achievements" EntitySet="Achievements" />
+            <End Role="UserAchievements" EntitySet="UserAchievements" />
+          </AssociationSet>
+          <AssociationSet Name="FK_AppUsageStats_Users" Association="Self.FK_AppUsageStats_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="AppUsageStats" EntitySet="AppUsageStats" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Emotions_Users" Association="Self.FK_Emotions_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Emotions" EntitySet="Emotions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Notes_Users" Association="Self.FK_Notes_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Notes" EntitySet="Notes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_PsychoTypes" Association="Self.FK_Users_PsychoTypes">
+            <End Role="PsychoTypes" EntitySet="PsychoTypes" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SleepSessions_Users" Association="Self.FK_SleepSessions_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="SleepSessions" EntitySet="SleepSessions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TestResults_Tests" Association="Self.FK_TestResults_Tests">
+            <End Role="Tests" EntitySet="Tests" />
+            <End Role="TestResults" EntitySet="TestResults" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TestResults_Users" Association="Self.FK_TestResults_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="TestResults" EntitySet="TestResults" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserAchievements_Users" Association="Self.FK_UserAchievements_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="UserAchievements" EntitySet="UserAchievements" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="Хранилище HealthPsicho_DBModelContainer" CdmEntityContainer="HealthPsicho_DBEntities">
+          <EntitySetMapping Name="Achievements">
+            <EntityTypeMapping TypeName="HealthPsicho_DBModel.Achievements">
+              <MappingFragment StoreEntitySet="Achievements">
+                <ScalarProperty Name="AchievementID" ColumnName="AchievementID" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="IconPath" ColumnName="IconPath" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AppUsageStats">
+            <EntityTypeMapping TypeName="HealthPsicho_DBModel.AppUsageStats">
+              <MappingFragment StoreEntitySet="AppUsageStats">
+                <ScalarProperty Name="StatID" ColumnName="StatID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+                <ScalarProperty Name="EndTime" ColumnName="EndTime" />
+                <ScalarProperty Name="TotalMinutes" ColumnName="TotalMinutes" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Emotions">
+            <EntityTypeMapping TypeName="HealthPsicho_DBModel.Emotions">
+              <MappingFragment StoreEntitySet="Emotions">
+                <ScalarProperty Name="EmotionID" ColumnName="EmotionID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="Mood" ColumnName="Mood" />
+                <ScalarProperty Name="Energy" ColumnName="Energy" />
+                <ScalarProperty Name="Anxiety" ColumnName="Anxiety" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Notes">
+            <EntityTypeMapping TypeName="HealthPsicho_DBModel.Notes">
+              <MappingFragment StoreEntitySet="Notes">
+                <ScalarProperty Name="NoteID" ColumnName="NoteID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Content" ColumnName="Content" />
+                <ScalarProperty Name="Mood" ColumnName="Mood" />
+                <ScalarProperty Name="StressLevel" ColumnName="StressLevel" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PsychoTypes">
+            <EntityTypeMapping TypeName="HealthPsicho_DBModel.PsychoTypes">
+              <MappingFragment StoreEntitySet="PsychoTypes">
+                <ScalarProperty Name="PsychoTypeID" ColumnName="PsychoTypeID" />
+                <ScalarProperty Name="TypeName" ColumnName="TypeName" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SleepSessions">
+            <EntityTypeMapping TypeName="HealthPsicho_DBModel.SleepSessions">
+              <MappingFragment StoreEntitySet="SleepSessions">
+                <ScalarProperty Name="SleepID" ColumnName="SleepID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="HoursSlept" ColumnName="HoursSlept" />
+                <ScalarProperty Name="SleepQuality" ColumnName="SleepQuality" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TestResults">
+            <EntityTypeMapping TypeName="HealthPsicho_DBModel.TestResults">
+              <MappingFragment StoreEntitySet="TestResults">
+                <ScalarProperty Name="ResultID" ColumnName="ResultID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="TestID" ColumnName="TestID" />
+                <ScalarProperty Name="Score" ColumnName="Score" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Tests">
+            <EntityTypeMapping TypeName="HealthPsicho_DBModel.Tests">
+              <MappingFragment StoreEntitySet="Tests">
+                <ScalarProperty Name="TestID" ColumnName="TestID" />
+                <ScalarProperty Name="TestName" ColumnName="TestName" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UserAchievements">
+            <EntityTypeMapping TypeName="HealthPsicho_DBModel.UserAchievements">
+              <MappingFragment StoreEntitySet="UserAchievements">
+                <ScalarProperty Name="UserAchievementID" ColumnName="UserAchievementID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="AchievementID" ColumnName="AchievementID" />
+                <ScalarProperty Name="DateEarned" ColumnName="DateEarned" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Users">
+            <EntityTypeMapping TypeName="HealthPsicho_DBModel.Users">
+              <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="Username" ColumnName="Username" />
+                <ScalarProperty Name="PasswordHash" ColumnName="PasswordHash" />
+                <ScalarProperty Name="PsychoTypeID" ColumnName="PsychoTypeID" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Нет" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

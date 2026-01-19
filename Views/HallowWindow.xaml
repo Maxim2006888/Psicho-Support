@@ -1,0 +1,42 @@
+﻿<Window x:Class="Psicho_Support.Views.HallowWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Psicho_Support.Views"
+        mc:Ignorable="d"
+        Title="Добро пожаловать" Height="450" Width="800"
+        WindowStartupLocation="CenterScreen"
+        Background="#1e1e2e">
+    <Grid>
+        <!-- Приветствие -->
+        <StackPanel x:Name="WelcomePanel" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock x:Name="WelcomeText" 
+               Text="Добро пожаловать в HealthPsicho Support"
+               Foreground="White"
+               FontSize="24"
+               TextAlignment="Center"
+               Margin="0,0,0,20"/>
+            <TextBlock x:Name="HintText"
+               Text="Для продолжения выберите действие:"
+               Foreground="Gray"
+               FontSize="16"
+               TextAlignment="Center"
+               Margin="0,0,0,30"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="LoginButton"
+                Content="Войти"
+                Width="120" Height="35"
+                Click="Login_Click"
+                Background="#444" Foreground="White"/>
+
+                <Button x:Name="RegisterButton"
+                Content="Регистрация"
+                Width="120" Height="35"
+                Click="Register_Click"
+                Background="#2E8B57" Foreground="White"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

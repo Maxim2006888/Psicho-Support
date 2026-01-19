@@ -1,0 +1,35 @@
+﻿<Window x:Class="Psicho_Support.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Psicho_Support"
+        mc:Ignorable="d"
+        Title="Загрузка" Height="220" Width="420"
+        WindowStartupLocation="CenterScreen"
+        Background="#1e1e2e"
+        Loaded="Window_Loaded">
+    
+    
+    <Grid>
+
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Window.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                 From="0" To="1" Duration="0:0:1"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock x:Name="StatusText"
+         Text="Подготавливаем интерфейс..."
+         Foreground="White" FontSize="20" TextAlignment="Center" Margin="0,0,0,8"/>
+            <TextBlock x:Name="DetailsText"
+         Foreground="LightGray" FontSize="12" TextAlignment="Center" />
+        </StackPanel>
+    </Grid>
+</Window>
