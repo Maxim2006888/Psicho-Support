@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="Psicho_Support.Views.Onboarding.Steps.PrivacyStepView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Margin="40">
+
+        <TextBlock Text="{Binding StepTitle}"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   TextAlignment="Center"/>
+
+        <TextBlock Text="{Binding StepDescription}"
+                   Margin="0,10,0,20"
+                   TextAlignment="Center"/>
+
+        <CheckBox Content="Я согласен с обработкой данных"
+                  IsChecked="{Binding IsAccepted}"
+                  FontSize="14"/>
+
+    </StackPanel>
+</UserControl>

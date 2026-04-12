@@ -1,29 +1,58 @@
-﻿using Psicho_Support.Data;
+﻿// Views/Pages/SettingsPage.xaml.cs
+using Microsoft.Extensions.DependencyInjection;
+using Psicho_Support.Services;
+using Psicho_Support.Services.Interfaces;
+using Psicho_Support.Views;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Psicho_Support.Views.Pages
 {
-    /// <summary>
-    /// Логика взаимодействия для SettingsPage.xaml
-    /// </summary>
-    public partial class SettingsPage : BasePage
+    public partial class SettingsPage : UserControl
     {
-        public SettingsPage() : base()
+        private readonly IThemeService _themeManager;
+        private readonly AppSession _session;
+
+        public SettingsPage()
         {
             InitializeComponent();
+
+            _themeManager = App.Services.GetRequiredService<IThemeService>();
+            _session = App.Services.GetRequiredService<AppSession>();
+
+            LoadData();
+        }
+
+        private void LoadData()
+        {
+            var user = _session?.CurrentUser;
+            if (user == null) return;
+
+            UsernameBox.Text = user.Username;
+            SessionTimeText.Text = _session.CurrentSessionDuration.ToString(@"mm\:ss");
+
+            ThemeToggle.IsChecked = _themeManager.IsDarkTheme;
+        }
+
+        private void ThemeToggle_Checked(object sender, RoutedEventArgs e)
+        {
+            _themeManager.IsDarkTheme = true;
+        }
+
+        private void ThemeToggle_Unchecked(object sender, RoutedEventArgs e)
+        {
+            _themeManager.IsDarkTheme = false;
+        }
+
+        private void Logout_Click(object sender, RoutedEventArgs e)
+        {
+            _session?.EndSession();
+
+            var loginWindow = App.Services.GetRequiredService<LoginWindow>();
+            loginWindow.Show();
+
+            Window.GetWindow(this)?.Close();
         }
     }
 }

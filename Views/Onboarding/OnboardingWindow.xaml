@@ -1,0 +1,100 @@
+﻿<!-- Views/Onboarding/OnboardingWindow.xaml -->
+<Window x:Class="Psicho_Support.Views.Onboarding.OnboardingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:helpers="clr-namespace:Psicho_Support.Helpers"
+        Width="480" Height="700"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+
+        <Storyboard x:Key="FadeInAnimation">
+            <DoubleAnimation
+            Storyboard.TargetName="StepContent"
+            Storyboard.TargetProperty="Opacity"
+            From="0" To="1" Duration="0:0:0.3"/>
+
+            <DoubleAnimation
+            Storyboard.TargetName="StepContent"
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+            From="50" To="0" Duration="0:0:0.3"/>
+        </Storyboard>
+    </Window.Resources>
+
+    <Grid>
+
+        <ContentControl x:Name="StepContent"
+            Grid.Row="1"
+            Content="{Binding CurrentStep}">
+            <ContentControl.RenderTransform>
+                <TranslateTransform X="0"/>
+            </ContentControl.RenderTransform>
+        </ContentControl>
+        
+        <Border Background="#80000000"/>
+
+        <Border Background="{DynamicResource BackgroundBrush}"
+                CornerRadius="24" Margin="20" Padding="24">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Прогресс -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,24">
+                    <ProgressBar Value="{Binding Progress, Mode=OneWay}" Height="4"
+                                 Foreground="{DynamicResource AccentBrush}"
+                                 Background="{DynamicResource SurfaceBrush}"/>
+                    <TextBlock Text="{Binding StepNumber, StringFormat='Шаг {0} из {1}'}"
+                               FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                </StackPanel>
+
+                <!-- Контент -->
+                <ContentControl Grid.Row="1" Content="{Binding CurrentStep}"/>
+
+                <!-- Кнопки -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+                    <Button Content="Пропустить" Command="{Binding SkipCommand}"
+                            Visibility="{Binding CanSkip, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            Background="Transparent" BorderBrush="{DynamicResource BorderBrush}"
+                            Margin="0,0,12,0" Padding="12,8"/>
+
+                    <Button Content="Назад" Command="{Binding PreviousCommand}"
+                            Visibility="{Binding CanPrevious, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            Background="Transparent" BorderBrush="{DynamicResource BorderBrush}"
+                            Margin="0,0,12,0" Padding="12,8"/>
+
+                    <Button Content="{Binding NextText}" Command="{Binding NextCommand}"
+                            Background="{DynamicResource AccentBrush}" Foreground="White" Padding="16,8"/>
+                </StackPanel>
+
+                <!-- Индикаторы -->
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                    <ItemsControl ItemsSource="{Binding Steps}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Ellipse Width="8" Height="8"
+                                         Fill="Gray"
+                                         Margin="4"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

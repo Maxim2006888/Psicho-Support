@@ -1,49 +1,166 @@
 ﻿using Psicho_Support.Data;
-using Psicho_Support.Services;
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Timers;
 
-namespace Psicho_Support
+namespace Psicho_Support.Services
 {
-    public static class AppSession
+    public class AppSession : INotifyPropertyChanged, IDisposable
     {
-        public static Users CurrentUser { get; private set; }
-        public static HealthPsicho_DBEntities Db { get; private set; }
-        private static SessionService _sessionService;
-        private static DateTime _startTime;
+        private Users _currentUser;
+        private DateTime _sessionStart;
+        private Timer _sessionTimer;
+        private int? _currentSessionId;
+        private bool _disposed;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler<UserChangedEventArgs> UserChanged;
 
-        public static TimeSpan CurrentSessionDuration => CurrentUser == null ? TimeSpan.Zero : DateTime.Now - _startTime;
-
-        public static void Initialize(Users user)
+        public AppSession()
         {
-            CurrentUser = user;
-            Db = new HealthPsicho_DBEntities();
-
-            _sessionService = new SessionService(Db);
-            _sessionService.Start(user.UserID);
-
-            _startTime = DateTime.Now;
+            _sessionTimer = new Timer(1000);
+            _sessionTimer.Elapsed += (s, e) => OnPropertyChanged(nameof(CurrentSessionDuration));
         }
 
-
-        public static void Start(Users user)
+        public Users CurrentUser
         {
-            Initialize(user); 
-        }
-
-        public static void End()
-        {
-            if (_sessionService != null)
+            get => _currentUser;
+            private set
             {
-                var duration = DateTime.Now - _startTime;
-                _sessionService.Stop(duration);
+                if (_currentUser != value)
+                {
+                    var oldUser = _currentUser;
+                    _currentUser = value;
+                    OnPropertyChanged();
+                    UserChanged?.Invoke(this, new UserChangedEventArgs(oldUser, value));
+                }
+            }
+        }
+
+        public DateTime SessionStart => _sessionStart;
+
+        public TimeSpan CurrentSessionDuration
+        {
+            get
+            {
+                if (_sessionStart == DateTime.MinValue || CurrentUser == null)
+                    return TimeSpan.Zero;
+
+                return DateTime.Now - _sessionStart;
+            }
+        }
+
+        public bool IsActive => CurrentUser != null;
+
+        // 🚀 СТАРТ СЕССИИ
+        public void StartSession(Users user)
+        {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+
+            if (IsActive)
+                EndSession();
+
+            CurrentUser = user;
+            _sessionStart = DateTime.Now;
+
+            try
+            {
+                using (var db = new HealthPsicho_DBEntities())
+                {
+                    var stat = new AppUsageStats
+                    {
+                        UserID = user.UserID,
+                        StartTime = _sessionStart
+                    };
+
+                    db.AppUsageStats.Add(stat);
+                    db.SaveChanges();
+
+                    _currentSessionId = stat.StatID; // ✅ ВОТ ИСПРАВЛЕНИЕ
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка старта сессии: {ex.Message}");
             }
 
-            Db?.Dispose();
+            _sessionTimer?.Start();
+        }
 
+        // 🛑 ЗАВЕРШЕНИЕ СЕССИИ
+        public void EndSession()
+        {
+            if (!IsActive)
+                return;
+
+            var endTime = DateTime.Now;
+            var duration = endTime - _sessionStart;
+
+            try
+            {
+                if (_currentSessionId.HasValue)
+                {
+                    using (var db = new HealthPsicho_DBEntities())
+                    {
+                        var stat = db.AppUsageStats.Find(_currentSessionId.Value);
+
+                        if (stat != null)
+                        {
+                            stat.EndTime = endTime;
+                            stat.TotalMinutes = (int)Math.Round(duration.TotalMinutes);
+
+                            db.SaveChanges();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка завершения сессии: {ex.Message}");
+            }
+
+            _currentSessionId = null;
             CurrentUser = null;
-            _sessionService = null;
-            Db = null;
+            _sessionStart = DateTime.MinValue;
+
+            _sessionTimer?.Stop();
+            OnPropertyChanged(nameof(CurrentSessionDuration));
+        }
+
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            EndSession();
+
+            if (_sessionTimer != null)
+            {
+                _sessionTimer.Stop();
+                _sessionTimer.Dispose();
+                _sessionTimer = null;
+            }
+
+            _disposed = true;
+        }
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    public class UserChangedEventArgs : EventArgs
+    {
+        public Users OldUser { get; }
+        public Users NewUser { get; }
+
+        public UserChangedEventArgs(Users oldUser, Users newUser)
+        {
+            OldUser = oldUser;
+            NewUser = newUser;
         }
     }
 }

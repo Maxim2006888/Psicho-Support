@@ -1,47 +1,36 @@
-﻿using Psicho_Support.Data;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Psicho_Support.Core;
+using Psicho_Support.Data;
+using Psicho_Support.Enums;
+using Psicho_Support.Services;
+using Psicho_Support.Services.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Data.Entity;
-using System.Windows.Threading;
-using Psicho_Support.Services;
 
 namespace Psicho_Support.Views
 {
-    /// <summary>
-    /// Логика взаимодействия для LoginWindow.xaml
-    /// </summary>
     public partial class LoginWindow : Window
     {
-        public LoginWindow()
+        private readonly IDialogService _dialogService;
+        private readonly INavigationService _navigationService;
+        private readonly AppSession _session;
+
+        public LoginWindow(
+            IDialogService dialogService,
+            INavigationService navigationService,
+            AppSession session)
         {
             InitializeComponent();
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+            _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
+            _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            // Пример: имитация загрузки
-            DetailsText.Visibility = Visibility.Visible;
-            DetailsText.Text = "Проверка подключения...";
-
-            // Используем DispatcherTimer для имитации загрузки
-            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
-            timer.Tick += (s, args) =>
-            {
-                timer.Stop();
-                DetailsText.Visibility = Visibility.Collapsed;
-            };
-            timer.Start();
+            UpdatePlaceholders();
         }
 
         private void Login_Click(object sender, RoutedEventArgs e)
@@ -49,44 +38,94 @@ namespace Psicho_Support.Views
             string login = LoginInput.Text.Trim();
             string password = PasswordInput.Password.Trim();
 
-            // Проверка на пустые поля
             if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Введите логин и пароль.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _dialogService.Show(
+                    "Ошибка",
+                    "Введите логин и пароль.",
+                    DialogType.Warning,
+                    this);
                 return;
             }
 
-            using (var db = new HealthPsicho_DBEntities())
+            Users user = null;
+
+            try
             {
-                var user = db.Users.FirstOrDefault(u => u.Username == login && u.PasswordHash == password);
-
-                if (user != null)
+                using (var db = new HealthPsicho_DBEntities())
                 {
-                    MessageBox.Show($"Добро пожаловать, {user.Username}!", "Вход выполнен");
-
-                    // Инициализируем сессию
-                    AppSession.Start(user);
-
-                    // Создаем UserWindow БЕЗ параметра
-                    UserWindow main = new UserWindow();
-                    main.Show();
-                    Close();
+                    user = db.Users
+                        .FirstOrDefault(u => u.Username == login && u.PasswordHash == password);
                 }
             }
+            catch (Exception ex)
+            {
+                _dialogService.Show(
+                    "Ошибка",
+                    $"Ошибка подключения к базе данных: {ex.Message}",
+                    DialogType.Error,
+                    this);
+                return;
+            }
+
+            if (user == null)
+            {
+                _dialogService.Show(
+                    "Ошибка входа",
+                    "Неверный логин или пароль.",
+                    DialogType.Error,
+                    this);
+                return;
+            }
+
+            // Запускаем сессию
+            _session.StartSession(user);
+
+            // ✅ Сохраняем пользователя в AppState (если используете)
+            var appState = App.Services.GetRequiredService<AppState>();
+            appState.CurrentUser = user;
+
+            // ✅ Сначала показываем сообщение об успехе
+            _dialogService.Show(
+                "Успех",
+                $"Добро пожаловать, {user.Username}!",
+                DialogType.Success,
+                this);
+
+            // ✅ Затем открываем главное окно
+            var mainWindow = App.Services.GetRequiredService<UserWindow>();
+            mainWindow.Show();
+
+            // ✅ Закрываем окно входа
+            Close();
         }
 
         private void Register_Click(object sender, RoutedEventArgs e)
         {
-            RegisterWindow register = new RegisterWindow();
-            register.Show();
+            var registerWindow = App.Services.GetRequiredService<RegisterWindow>();
+            registerWindow.Show();
             Close();
         }
 
-        // Опционально: небольшая визуальная реакция на изменение текста
-        private void Input_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private void Input_TextChanged(object sender, TextChangedEventArgs e)
         {
-            // Можно добавить анимацию placeholder или подсветку, если будет нужно позже
+            UpdatePlaceholders();
+        }
+
+        private void PasswordInput_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            UpdatePlaceholders();
+        }
+
+        private void UpdatePlaceholders()
+        {
+            LoginPlaceholder.Visibility = string.IsNullOrEmpty(LoginInput.Text)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+
+            PasswordPlaceholder.Visibility = string.IsNullOrEmpty(PasswordInput.Password)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
     }
 }
-

@@ -1,14 +1,180 @@
-﻿<local:BasePage x:Class="Psicho_Support.Views.Pages.AchievementsPage"
-                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                xmlns:local="clr-namespace:Psicho_Support.Views.Pages"
-                Background="Transparent">
+﻿<!-- Views/Pages/AchievementsPage.xaml -->
+<UserControl x:Class="Psicho_Support.Views.Pages.AchievementsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource BackgroundBrush}">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="AchievementItemTemplate">
+            <Border CornerRadius="12"
+                    Margin="10"
+                    Padding="15"
+                    Opacity="{Binding Opacity}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="#757575"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsUnlocked}" Value="True">
+                                <Setter Property="Background" Value="#4CAF50"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Иконка достижения -->
+                    <Border Grid.Column="0"
+                            Width="50"
+                            Height="50"
+                            CornerRadius="25"
+                            Background="White"
+                            Margin="0,0,15,0">
+                        <TextBlock Text="{Binding IconPath}"
+                                   FontSize="28"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Информация о достижении -->
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding Title}"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="White"/>
+
+                        <TextBlock Text="{Binding Description}"
+                                   FontSize="12"
+                                   Foreground="#DDDDDD"
+                                   TextWrapping="Wrap"
+                                   Margin="0,5,0,0"/>
+
+                        <TextBlock Text="{Binding UnlockedDateText}"
+                                   FontSize="11"
+                                   Foreground="#CCCCCC"
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
 
     <Grid>
-        <ListBox x:Name="AchievementsListBox"
-                 Background="Transparent"
-                 Foreground="White"
-                 Margin="20"
-                 FontSize="16"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок с прогрессом -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource AccentBrush}"
+                Padding="20">
+            <StackPanel>
+                <TextBlock Text="🏆 Достижения"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Foreground="White"/>
+
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding UnlockedCount}"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="White"/>
+
+                    <TextBlock Grid.Column="1"
+                               Text="/"
+                               FontSize="18"
+                               Foreground="White"
+                               HorizontalAlignment="Center"/>
+
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding TotalCount}"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="White"/>
+                </Grid>
+
+                <ProgressBar Value="{Binding TotalProgress}"
+                             Maximum="100"
+                             Height="8"
+                             Margin="0,10,0,0"
+                             Foreground="#4CAF50"
+                             Background="#3A3A4A"/>
+
+                <TextBlock Text="{Binding TotalProgress, StringFormat={}{0}% завершено}"
+                           FontSize="12"
+                           Foreground="#DDDDDD"
+                           Margin="0,5,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Список достижений -->
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- Индикатор загрузки -->
+                <Border Background="#2A2A3D"
+                        CornerRadius="12"
+                        Margin="20"
+                        Padding="20"
+                        Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel>
+                        <TextBlock Text="⏳"
+                                   FontSize="32"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Загрузка достижений..."
+                                   FontSize="14"
+                                   Foreground="#AAAAAA"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,10,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Сообщение об ошибке -->
+                <Border Background="#F44336"
+                        CornerRadius="12"
+                        Margin="20"
+                        Padding="20"
+                        Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
+                    <TextBlock Text="{Binding ErrorMessage}"
+                               FontSize="14"
+                               Foreground="White"
+                               TextWrapping="Wrap"/>
+                </Border>
+
+                <!-- Список достижений -->
+                <!-- Views/Pages/AchievementsPage.xaml - только секция со списком -->
+                <!-- Список достижений -->
+                <ItemsControl ItemsSource="{Binding Achievements}"
+              ItemTemplate="{StaticResource AchievementItemTemplate}">
+                    <ItemsControl.Style>
+                        <Style TargetType="ItemsControl">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ItemsControl.Style>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
-</local:BasePage>
+</UserControl>

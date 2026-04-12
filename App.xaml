@@ -1,16 +1,32 @@
 ﻿<Application x:Class="Psicho_Support.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Psicho_Support"
-             StartupUri="MainWindow.xaml">
+             xmlns:helpers="clr-namespace:Psicho_Support.Helpers"
+             DispatcherUnhandledException="App_DispatcherUnhandledException">
+
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!-- Подключаем все словари ресурсов -->
                 <ResourceDictionary Source="Themes/Colors.xaml"/>
-                <ResourceDictionary Source="/Themes/Controls.xaml"/>
+                <ResourceDictionary Source="Themes/Controls.xaml"/>
+                <ResourceDictionary Source="Themes/DialogStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- КОНВЕРТЕРЫ -->
+            <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <helpers:BooleanToColorConverter x:Key="BooleanToColorConverter"/>
+            <helpers:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+            <helpers:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+            <helpers:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter"/>
+            <helpers:StateToColorConverter x:Key="StateToColorConverter"/>
+            <helpers:StateToEmojiConverter x:Key="StateToEmojiConverter"/>
+            <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <helpers:StringToBrushConverter x:Key="StringToBrushConverter"/>
+            <helpers:StressToCardColorConverter x:Key="StressToCardColorConverter"/>
+            <helpers:StressToTextColorConverter x:Key="StressToTextColorConverter"/>
+            <helpers:StressToEmojiConverter x:Key="StressToEmojiConverter"/>
+            <helpers:ExpandCollapseIconConverter x:Key="ExpandCollapseIconConverter"/>
         </ResourceDictionary>
-        
-        
     </Application.Resources>
 </Application>

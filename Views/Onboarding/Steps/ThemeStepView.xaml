@@ -1,0 +1,68 @@
+﻿<!-- Views/Onboarding/Steps/ThemeStepView.xaml -->
+<UserControl x:Class="Psicho_Support.Views.Onboarding.Steps.ThemeStepView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel Margin="20">
+        <TextBlock Text="🎨" FontSize="64" HorizontalAlignment="Center"/>
+
+        <TextBlock Text="Выбери свой стиль"
+                   FontSize="20" FontWeight="Bold" TextAlignment="Center" Margin="0,16,0,8"/>
+
+        <TextBlock Text="Настрой внешний вид так, как тебе комфортно"
+                   FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" 
+                   TextAlignment="Center" Margin="0,0,0,24"/>
+
+        <!-- Тема -->
+        <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="12" Padding="16" Margin="0,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="🌙" FontSize="20" Margin="0,0,12,0"/>
+                <TextBlock Grid.Column="1" Text="Темная тема" VerticalAlignment="Center"/>
+
+                <ToggleButton Grid.Column="2"
+                              IsChecked="{Binding IsDarkTheme}"
+                              Width="40" Height="20"/>
+            </Grid>
+        </Border>
+
+        <!-- Акцентный цвет -->
+        <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="12" Padding="16" Margin="0,8">
+            <StackPanel>
+                <TextBlock Text="Акцентный цвет" Margin="0,0,0,12"/>
+
+                <WrapPanel HorizontalAlignment="Center">
+                    <Border Background="#5A4FCF" Width="40" Height="40" CornerRadius="20" Margin="4" Cursor="Hand">
+                        <Border.InputBindings>
+                            <MouseBinding Gesture="LeftClick" Command="{Binding SetColorCommand}" CommandParameter="#5A4FCF"/>
+                        </Border.InputBindings>
+                    </Border>
+                    <Border Background="#4CAF50" Width="40" Height="40" CornerRadius="20" Margin="4" Cursor="Hand">
+                        <Border.InputBindings>
+                            <MouseBinding Gesture="LeftClick" Command="{Binding SetColorCommand}" CommandParameter="#4CAF50"/>
+                        </Border.InputBindings>
+                    </Border>
+                    <Border Background="#FF9800" Width="40" Height="40" CornerRadius="20" Margin="4" Cursor="Hand">
+                        <Border.InputBindings>
+                            <MouseBinding Gesture="LeftClick" Command="{Binding SetColorCommand}" CommandParameter="#FF9800"/>
+                        </Border.InputBindings>
+                    </Border>
+                    <Border Background="#2196F3" Width="40" Height="40" CornerRadius="20" Margin="4" Cursor="Hand">
+                        <Border.InputBindings>
+                            <MouseBinding Gesture="LeftClick" Command="{Binding SetColorCommand}" CommandParameter="#2196F3"/>
+                        </Border.InputBindings>
+                    </Border>
+                    <Border Background="#E91E63" Width="40" Height="40" CornerRadius="20" Margin="4" Cursor="Hand">
+                        <Border.InputBindings>
+                            <MouseBinding Gesture="LeftClick" Command="{Binding SetColorCommand}" CommandParameter="#E91E63"/>
+                        </Border.InputBindings>
+                    </Border>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

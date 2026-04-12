@@ -1,38 +1,117 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- Эффект тени для карточек -->
+    <DropShadowEffect x:Key="CardShadowEffect"
+                      BlurRadius="8"
+                      ShadowDepth="2"
+                      Opacity="0.2"
+                      Color="Black"/>
+
+    <!-- Меню кнопки -->
     <Style x:Key="MenuButtonStyle" TargetType="Button">
-        <Setter Property="Foreground" Value="#EEEEEE"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="FontSize" Value="16"/>
         <Setter Property="Margin" Value="0,6,0,6"/>
         <Setter Property="Padding" Value="10"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="HorizontalContentAlignment" Value="Left"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" CornerRadius="6">
-                        <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#404060"/>
+                <Setter Property="Background" Value="{DynamicResource SurfaceLightBrush}"/>
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
-                <Setter Property="Background" Value="#505070"/>
+                <Setter Property="Background" Value="{DynamicResource SurfaceDarkBrush}"/>
             </Trigger>
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="TopBarButtonStyle" TargetType="Button" BasedOn="{StaticResource MenuButtonStyle}">
-        <Setter Property="Foreground" Value="#CCCCCC"/>
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="Margin" Value="6,0,0,0"/>
+    <!-- Иконка кнопки -->
+    <Style x:Key="IconButtonStyle" TargetType="Button">
+        <Setter Property="Width" Value="40"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FontSize" Value="16"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource SurfaceLightBrush}"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Кнопка быстрых действий -->
+    <Style x:Key="QuickActionButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource SurfaceLightBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Padding" Value="15"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="12">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource AccentLightBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Стиль для ProgressBar -->
+    <Style TargetType="ProgressBar">
+        <Setter Property="Height" Value="6"/>
+        <Setter Property="Background" Value="{DynamicResource SurfaceLightBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <!-- Карточки -->
+    <Style x:Key="CardStyle" TargetType="Border">
+        <Setter Property="Background" Value="#2A2A3D"/>
+        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="Padding" Value="20"/>
+        <Setter Property="Margin" Value="0,0,0,15"/>
+        <Setter Property="Effect" Value="{StaticResource CardShadowEffect}"/>
+    </Style>
+
+    <!-- Стиль для карточки заметки -->
+    <Style x:Key="NoteCardStyle" TargetType="Border">
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="Margin" Value="5"/>
+        <Setter Property="Padding" Value="14"/>
+        <Setter Property="Effect" Value="{StaticResource CardShadowEffect}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+
+    <Style x:Key="CardTitle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Foreground" Value="#AAAAAA"/>
+    </Style>
+
+    <Style x:Key="CardValue" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="22"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="White"/>
     </Style>
 
 </ResourceDictionary>

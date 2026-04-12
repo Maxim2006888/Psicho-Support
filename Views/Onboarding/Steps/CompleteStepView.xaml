@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="Psicho_Support.Views.Onboarding.Steps.CompleteStepView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Margin="40">
+
+        <TextBlock Text="Ты готов"
+                   FontSize="28"
+                   FontWeight="Bold"
+                   TextAlignment="Center"/>
+
+        <TextBlock Text="Давай начнём"
+                   FontSize="16"
+                   Opacity="0.7"
+                   TextAlignment="Center"
+                   Margin="0,10,0,0"/>
+
+    </StackPanel>
+</UserControl>

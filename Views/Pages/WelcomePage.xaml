@@ -1,15 +1,290 @@
-﻿<local:BasePage x:Class="Psicho_Support.Views.Pages.WelcomePage"
-                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                xmlns:local="clr-namespace:Psicho_Support.Views.Pages"
-                Background="Transparent">
+﻿<UserControl x:Class="Psicho_Support.Views.Pages.WelcomePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:Psicho_Support.Controls"
+             xmlns:helpers="clr-namespace:Psicho_Support.Helpers"
+             Background="#1E1E2F">
 
-    <Grid>
-        <TextBlock Text="{Binding}"
-                   Foreground="White"
-                   FontSize="22"
-                   TextWrapping="Wrap"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"/>
-    </Grid>
-</local:BasePage>
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Themes/Controls.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Конвертеры -->
+            <helpers:BooleanToVisibilityConverter x:Key="BoolToVis"/>
+            <helpers:InverseBooleanConverter x:Key="InverseBoolToVis"/>
+            <helpers:StateToColorConverter x:Key="StateToColorConverter"/>
+            <helpers:StateToEmojiConverter x:Key="StateToEmojiConverter"/>
+
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  Padding="20">
+
+        <StackPanel>
+            <!-- Приветствие -->
+            <Border Background="#2A2A3D"
+                    CornerRadius="16"
+                    Padding="20"
+                    Margin="0,0,0,15">
+
+                <StackPanel>
+                    <TextBlock Text="👋 Привет,"
+                               FontSize="16"
+                               Foreground="#AAAAAA"/>
+
+                    <TextBlock Text="{Binding UserName, Mode=OneWay}"
+                               FontSize="28"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               Margin="0,5,0,0"/>
+
+                    <TextBlock Text="{Binding GreetingMessage, Mode=OneWay}"
+                               FontSize="14"
+                               Foreground="#AAAAAA"
+                               Margin="0,10,0,0"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Индикатор состояния -->
+            <Border Background="#2A2A3D"
+                    CornerRadius="16"
+                    Padding="20"
+                    Margin="0,0,0,15">
+
+                <StackPanel>
+                    <TextBlock Text="📊 Ваше состояние"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="White"
+                               Margin="0,0,0,15"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0"
+                                Width="100"
+                                Height="100"
+                                CornerRadius="50"
+                                Background="{Binding StateColor, Mode=OneWay}"
+                                Margin="0,0,20,0">
+
+                            <TextBlock Text="{Binding StateValue, Mode=OneWay}"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding StateLevel, Mode=OneWay}"
+                                       FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="White"/>
+
+                            <TextBlock Text="{Binding StateDescription, Mode=OneWay}"
+                                       FontSize="14"
+                                       Foreground="#AAAAAA"
+                                       TextWrapping="Wrap"
+                                       Margin="0,5,0,0"/>
+
+                            <ProgressBar Value="{Binding StateValue, Mode=OneWay}"
+                                         Height="6"
+                                         Foreground="{Binding StateColor, Mode=OneWay}"
+                                         Background="#3A3A4A"
+                                         Margin="0,10,0,0"
+                                         Maximum="100"/>
+
+                            <Border Background="#3A3A4A"
+                                    CornerRadius="4"
+                                    Padding="8"
+                                    Margin="0,10,0,0"
+                                    Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Обновление статистики..."
+                                          FontSize="12"
+                                          Foreground="#AAAAAA"
+                                          HorizontalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Мотивирующая цитата -->
+            <Border CornerRadius="16"
+                    Padding="20"
+                    Margin="0,0,0,15">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#5A4FCF" Offset="0"/>
+                        <GradientStop Color="#7C6FF0" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+
+                <StackPanel>
+                    <TextBlock Text="✨ Цитата дня"
+                               FontSize="12"
+                               Foreground="#DDDDDD"
+                               Opacity="0.8"/>
+
+                    <TextBlock Text="{Binding DailyQuote, Mode=OneWay}"
+                               FontSize="16"
+                               FontStyle="Italic"
+                               Foreground="White"
+                               TextWrapping="Wrap"
+                               Margin="0,10,0,10"/>
+
+                    <TextBlock Text="{Binding QuoteAuthor, Mode=OneWay}"
+                               FontSize="12"
+                               Foreground="#DDDDDD"
+                               HorizontalAlignment="Right"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Быстрые действия -->
+            <Border Background="#2A2A3D"
+                    CornerRadius="16"
+                    Padding="20"
+                    Margin="0,0,0,15">
+
+                <StackPanel>
+                    <TextBlock Text="⚡ Быстрые действия"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="White"
+                               Margin="0,0,0,15"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Margin="0,0,5,0"
+                                Style="{StaticResource QuickActionButtonStyle}"
+                                Command="{Binding CreateNoteCommand}">
+                            <StackPanel>
+                                <TextBlock Text="📝"
+                                           FontSize="30"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Создать заметку"
+                                           FontSize="12"
+                                           Foreground="White"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Grid.Column="1"
+                                Margin="5,0,0,0"
+                                Style="{StaticResource QuickActionButtonStyle}"
+                                Command="{Binding TakeTestCommand}">
+                            <StackPanel>
+                                <TextBlock Text="🧠"
+                                           FontSize="30"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Пройти тест"
+                                           FontSize="12"
+                                           Foreground="White"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Статистика за сегодня -->
+            <Border Background="#2A2A3D"
+                    CornerRadius="16"
+                    Padding="20"
+                    Margin="0,0,0,15">
+
+                <StackPanel>
+                    <TextBlock Text="📈 Статистика за сегодня"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="White"
+                               Margin="0,0,0,15"/>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,15">
+                            <TextBlock Text="📋 Заметок"
+                                       FontSize="12"
+                                       Foreground="#AAAAAA"/>
+                            <TextBlock Text="{Binding TodayNotesCount, Mode=OneWay}"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       Foreground="White"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,15">
+                            <TextBlock Text="📊 Тестов"
+                                       FontSize="12"
+                                       Foreground="#AAAAAA"/>
+                            <TextBlock Text="{Binding TodayTestsCount, Mode=OneWay}"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       Foreground="White"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                            <TextBlock Text="📉 Средний уровень стресса"
+                                       FontSize="12"
+                                       Foreground="#AAAAAA"/>
+                            <TextBlock Text="{Binding AvgStressToday, Mode=OneWay}"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       Foreground="{Binding AvgStressColor, Mode=OneWay}"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Совет дня -->
+            <Border Background="#2A2A3D"
+                    CornerRadius="16"
+                    Padding="20">
+
+                <StackPanel>
+                    <TextBlock Text="💡 Совет дня"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="White"
+                               Margin="0,0,0,15"/>
+
+                    <TextBlock Text="{Binding DailyAdvice, Mode=OneWay}"
+                               FontSize="14"
+                               Foreground="#AAAAAA"
+                               TextWrapping="Wrap"/>
+
+                    <TextBlock Text="{Binding AdviceSource, Mode=OneWay}"
+                               FontSize="11"
+                               Foreground="#777777"
+                               HorizontalAlignment="Right"
+                               Margin="0,10,0,0"/>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

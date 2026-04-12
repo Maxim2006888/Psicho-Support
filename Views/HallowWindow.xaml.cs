@@ -1,41 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Psicho_Support.Services.Interfaces;
+using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace Psicho_Support.Views
 {
-    /// <summary>
-    /// Логика взаимодействия для HallowWindow.xaml
-    /// </summary>
     public partial class HallowWindow : Window
     {
-        public HallowWindow()
+        private readonly INavigationService _navigationService;
+
+        public HallowWindow(INavigationService navigationService)
         {
             InitializeComponent();
+            _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
+
+            if (Application.Current.MainWindow == null)
+            {
+                Application.Current.MainWindow = this;
+            }
         }
 
         private void Login_Click(object sender, RoutedEventArgs e)
         {
-            var login = new LoginWindow();
-            login.Show();
-            this.Close();
+            // ✅ Создаём новое окно входа
+            _navigationService.SwitchToWindow<LoginWindow>();
+            Close();
         }
 
         private void Register_Click(object sender, RoutedEventArgs e)
         {
-            var register = new RegisterWindow();
-            register.Show();
-            this.Close();
+            // ✅ Создаём новое окно регистрации
+            _navigationService.SwitchToWindow<RegisterWindow>();
+            Close();
         }
     }
 }

@@ -1,30 +1,24 @@
-﻿using Psicho_Support.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Psicho_Support.Services;
+using Psicho_Support.ViewModels;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Psicho_Support.Views.Pages
 {
-    /// <summary>
-    /// Логика взаимодействия для AdvicePage.xaml
-    /// </summary>
-    public partial class AdvicePage : BasePage
+    public partial class AdvicePage : UserControl
     {
-        public AdvicePage() : base()
+        private AdviceViewModel _viewModel;
+
+        public AdvicePage()
         {
             InitializeComponent();
         }
 
+        // Метод для установки ViewModel через DI
+        public void SetViewModel(AdviceViewModel viewModel)
+        {
+            _viewModel = viewModel;
+            DataContext = _viewModel;
+        }
     }
 }

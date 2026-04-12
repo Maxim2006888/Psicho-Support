@@ -1,35 +1,30 @@
-﻿using Psicho_Support.Data;
-using System.Linq;
+﻿using Psicho_Support.Services;
+using Psicho_Support.Services.Interfaces;
+using Psicho_Support.ViewModels;
+using System.Windows.Controls;
 
 namespace Psicho_Support.Views.Pages
 {
-    public partial class NotesPage : BasePage
+    public partial class NotesPage : UserControl
     {
+        private NotesViewModel _viewModel;
+
         public NotesPage()
         {
             InitializeComponent();
-            LoadNotes();
         }
 
-        private void LoadNotes()
+        public void SetViewModel(NotesViewModel viewModel)
         {
-            using (var db = new HealthPsicho_DBEntities())
+            _viewModel = viewModel;
+            DataContext = _viewModel;
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_viewModel != null)
             {
-                var notes = db.Notes
-                    .Where(n => n.UserID == CurrentUser.UserID)
-                    .ToList();
-
-                NotesList.Items.Clear();
-
-                if (notes.Any())
-                {
-                    foreach (var n in notes)
-                        NotesList.Items.Add($"📝 {n.Title}");
-                }
-                else
-                {
-                    NotesList.Items.Add("У вас пока нет заметок.");
-                }
+                System.Windows.Input.CommandManager.InvalidateRequerySuggested();
             }
         }
     }

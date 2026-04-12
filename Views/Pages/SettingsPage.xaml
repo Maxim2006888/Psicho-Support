@@ -1,9 +1,120 @@
-﻿<local:BasePage x:Class="Psicho_Support.Views.Pages.SettingsPage"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Psicho_Support.Views.Pages">
+﻿<UserControl
+    x:Class="Psicho_Support.Views.Pages.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Grid>
+    <Grid Margin="20">
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+
+            <StackPanel>
+
+                <!-- TITLE -->
+
+                <TextBlock
+                    Text="Настройки"
+                    FontSize="26"
+                    FontWeight="SemiBold"
+                    Margin="0 0 0 20"/>
+
+
+                <!-- USER CARD -->
+
+                <Border
+                    Background="#55FFFFFF"
+                    CornerRadius="18"
+                    Padding="20"
+                    Margin="0 0 0 20">
+
+                    
+
+                    <StackPanel>
+
+                        <TextBlock
+                            Text="Пользователь"
+                            FontWeight="SemiBold"
+                            Margin="0 0 0 10"/>
+
+                        <TextBox
+                            x:Name="UsernameBox"
+                            IsReadOnly="True"
+                            Height="36"/>
+
+                    </StackPanel>
+
+                </Border>
+
+
+                <!-- THEME CARD -->
+
+                <Border
+                    Background="#55FFFFFF"
+                    CornerRadius="18"
+                    Padding="20"
+                    Margin="0 0 0 20">
+
+                    
+
+                    <StackPanel>
+
+                        <TextBlock
+                            Text="Тема приложения"
+                            FontWeight="SemiBold"
+                            Margin="0 0 0 10"/>
+
+                        <ToggleButton
+                            x:Name="ThemeToggle"
+                            Content="Тёмная тема"
+                            Height="36"
+                            Checked="ThemeToggle_Checked"
+                            Unchecked="ThemeToggle_Unchecked"/>
+
+                    </StackPanel>
+
+                </Border>
+
+
+                <!-- SESSION CARD -->
+
+                <Border
+                    Background="#55FFFFFF"
+                    CornerRadius="18"
+                    Padding="20"
+                    Margin="0 0 0 20">
+
+                    
+
+                    <StackPanel>
+
+                        <TextBlock
+                            Text="Текущая сессия"
+                            FontWeight="SemiBold"
+                            Margin="0 0 0 10"/>
+
+                        <TextBlock
+                            x:Name="SessionTimeText"
+                            FontSize="18"
+                            FontWeight="SemiBold"/>
+
+                    </StackPanel>
+
+                </Border>
+
+
+                <!-- LOGOUT -->
+
+                <Button
+                    Content="Выйти из аккаунта"
+                    Height="44"
+                    Background="#D32F2F"
+                    Foreground="White"
+                    Margin="0 10 0 40"
+                    Click="Logout_Click"/>
+
+            </StackPanel>
+
+        </ScrollViewer>
 
     </Grid>
-</local:BasePage>
+
+</UserControl>
