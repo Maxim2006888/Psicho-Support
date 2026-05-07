@@ -32,6 +32,8 @@ namespace Psicho_Support.ViewModels
 
     public class AnalyticsViewModel : BaseViewModel, IDisposable
     {
+        private readonly EmotionMemoryService _memory;
+        private readonly EmotionTrendAnalyzer _trend;
         private readonly AnalyticsService _analyticsService;
         private readonly DispatcherTimer _refreshTimer;
         private readonly AppSession _session;
@@ -297,13 +299,7 @@ namespace Psicho_Support.ViewModels
 
         private async Task LoadAnalyticsAsync()
         {
-            if (!_appState.IsAuthenticated)
-            {
-                return; // Не показываем сообщение об ошибке при фоновом обновлении
-            }
-
-            // Если уже загружаем, пропускаем
-            if (IsBusy)
+            if (!_appState.IsAuthenticated || IsBusy)
                 return;
 
             IsBusy = true;
@@ -312,28 +308,40 @@ namespace Psicho_Support.ViewModels
             {
                 var userId = _appState.CurrentUser.UserID;
 
-                var data = await Task.Run(() => new AnalyticsData
+                // 🔹 Загружаем данные в фоне
+                var data = await Task.Run(() =>
                 {
-                    TotalTimeSpent = _analyticsService.GetTotalTimeSpent(userId),
-                    SessionCount = _analyticsService.GetSessionCount(userId),
-                    AverageSessionDuration = _analyticsService.GetAverageSessionDuration(userId),
-                    ActivityLast7Days = _analyticsService.GetActivityForLast7Days(userId),
-                    CurrentStateValue = _stateService.CurrentValue,
-                    PreviousStateValue = _analyticsService.GetPreviousStateValue(userId),
-                    AverageStressLastWeek = _analyticsService.GetAverageStressLastWeek(userId),
-                    AverageStressPreviousWeek = _analyticsService.GetAverageStressPreviousWeek(userId)
+                    return new AnalyticsData
+                    {
+                        TotalTimeSpent = _analyticsService.GetTotalTimeSpent(userId),
+                        SessionCount = _analyticsService.GetSessionCount(userId),
+                        AverageSessionDuration = _analyticsService.GetAverageSessionDuration(userId),
+                        ActivityLast7Days = _analyticsService.GetActivityForLast7Days(userId),
+
+                        // 🔥 текущее состояние берём напрямую
+                        CurrentStateValue = _stateService.CurrentValue,
+
+                        PreviousStateValue = _analyticsService.GetPreviousStateValue(userId),
+                        AverageStressLastWeek = _analyticsService.GetAverageStressLastWeek(userId),
+                        AverageStressPreviousWeek = _analyticsService.GetAverageStressPreviousWeek(userId)
+                    };
                 });
 
+                // 🔹 Обновляем UI
                 Data = data;
                 PreviousWeekStress = data.AverageStressPreviousWeek;
                 CurrentWeekStress = data.AverageStressLastWeek;
 
-                await Task.Run(() => LoadStressChart(userId));
+                // 🔥 График отдельно (не блокируем основной поток)
+                _ = Task.Run(() => LoadStressChart(userId));
+
+                // 🔥 (опционально) — сюда можно добавить:
+                // ModelConfidence = _memory.GetConfidence(userId);
+
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"LoadAnalyticsAsync error: {ex.Message}");
-                // Не показываем диалог при фоновом обновлении, чтобы не беспокоить пользователя
+                System.Diagnostics.Debug.WriteLine($"LoadAnalyticsAsync error: {ex}");
             }
             finally
             {

@@ -214,14 +214,23 @@
     <Compile Include="Helpers\TextEmotionAnalyzer.cs" />
     <Compile Include="Helpers\VisualTreeHelperExtensions.cs" />
     <Compile Include="Models\EmotionResult.cs" />
+    <Compile Include="Models\EmotionSnapshot.cs" />
+    <Compile Include="Models\EmotionState.cs" />
     <Compile Include="Models\TestAnswer.cs" />
     <Compile Include="Models\TestQuestion.cs" />
+    <Compile Include="Models\UserEmotionTimeline.cs" />
     <Compile Include="Services\AchievementService.cs" />
     <Compile Include="Services\AnalyticsService.cs" />
     <Compile Include="Services\AppSession.cs" />
     <Compile Include="Services\DialogService.cs">
       <Generator>MSBuild:Compile</Generator>
     </Compile>
+    <Compile Include="Services\EmotionAnalysisService.cs" />
+    <Compile Include="Services\EmotionBehaviorEngine.cs" />
+    <Compile Include="Services\EmotionMemoryService.cs" />
+    <Compile Include="Services\EmotionPredictor.cs" />
+    <Compile Include="Services\EmotionStateMachine.cs" />
+    <Compile Include="Services\EmotionTrendAnalyzer.cs" />
     <Compile Include="Services\Interfaces\IDataService.cs" />
     <Compile Include="Services\Interfaces\IDialogService.cs" />
     <Compile Include="Services\Interfaces\INavigationService.cs" />

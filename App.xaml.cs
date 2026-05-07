@@ -12,6 +12,7 @@ using System;
 using System.Configuration;
 using System.Windows;
 using Psicho_Support.Properties;
+using Psicho_Support.Helpers;
 
 
 namespace Psicho_Support
@@ -90,7 +91,15 @@ namespace Psicho_Support
             services.AddSingleton<IDialogService, DialogService>();
             services.AddSingleton<IThemeService, ThemeManager>();
             services.AddSingleton<INavigationService, NavigationService>();
-            services.AddSingleton<INotificationService, NotificationService>(); // Добавляем
+            services.AddSingleton<INotificationService, NotificationService>();
+            
+            //Эмоциональная система 
+            services.AddSingleton<TextEmotionAnalyzer>();
+            services.AddSingleton<EmotionMemoryService>();
+            services.AddSingleton<EmotionTrendAnalyzer>();
+            services.AddSingleton<EmotionStateMachine>();
+            services.AddSingleton<EmotionPredictor>();
+            services.AddSingleton<EmotionBehaviorEngine>();
 
             // Core
             services.AddSingleton<AppState>();
@@ -106,7 +115,7 @@ namespace Psicho_Support
             services.AddTransient<AdviceViewModel>();
             services.AddTransient<SettingsViewModel>();
             services.AddTransient<UserWindowViewModel>();
-            services.AddTransient<OnboardingViewModel>(); // Добавляем
+            services.AddTransient<OnboardingViewModel>(); 
             services.AddTransient<WelcomeStepViewModel>();
             services.AddTransient<PrivacyStepViewModel>();
             services.AddTransient<ThemeStepViewModel>();
@@ -119,7 +128,7 @@ namespace Psicho_Support
             services.AddTransient<UserWindow>();
             services.AddTransient<LoginWindow>();
             services.AddTransient<RegisterWindow>();
-            services.AddTransient<OnboardingWindow>(); // Добавляем
+            services.AddTransient<OnboardingWindow>(); 
 
             // Pages (UserControl)
             services.AddTransient<WelcomePage>();
@@ -136,7 +145,6 @@ namespace Psicho_Support
             services.AddTransient<ThemeStepView>();
             services.AddTransient<NotificationStepView>();
             services.AddTransient<CompleteStepView>();
-            services.AddTransient<OnboardingWindow>();
         }
     }
 }

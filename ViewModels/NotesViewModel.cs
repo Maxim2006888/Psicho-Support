@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -17,6 +18,9 @@ namespace Psicho_Support.ViewModels
 {
     public class NotesViewModel : INotifyPropertyChanged, IDisposable
     {
+        private readonly EmotionMemoryService _memoryService;
+        private readonly EmotionBehaviorEngine _emotionEngine;
+        private readonly TextEmotionAnalyzer _analyzer;
         private readonly TextEmotionAnalyzer _emotionAnalyzer;
         private readonly UserStateService _stateService;
         private readonly AppSession _session;
@@ -187,15 +191,21 @@ namespace Psicho_Support.ViewModels
         public ICommand CreateNewNoteCommand { get; }
 
         public NotesViewModel(
-            AppSession session,
-            AppState appState,
-            UserStateService stateService,
-            IDialogService dialogService)
+    AppSession session,
+    AppState appState,
+    UserStateService stateService,
+    IDialogService dialogService,
+    EmotionMemoryService memoryService,
+    EmotionBehaviorEngine emotionEngine)
         {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
-            _appState = appState ?? throw new ArgumentNullException(nameof(appState));
-            _stateService = stateService ?? throw new ArgumentNullException(nameof(stateService));
-            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+            _session = session;
+            _appState = appState;
+            _stateService = stateService;
+            _dialogService = dialogService;
+
+            _memoryService = memoryService;
+            _emotionEngine = emotionEngine;
+
             _emotionAnalyzer = new TextEmotionAnalyzer();
 
             Notes = new ObservableCollection<Notes>();
@@ -207,7 +217,7 @@ namespace Psicho_Support.ViewModels
 
             _stateService.StateChanged += OnStateChanged;
 
-            SaveNoteCommand = new RelayCommand(SaveNote);
+            SaveNoteCommand = new RelayCommand(async () => await SaveNote());
             DeleteNoteCommand = new RelayCommand(DeleteNote);
             BackToListCommand = new RelayCommand(BackToList);
             CreateNewNoteCommand = new RelayCommand(CreateNewNote);
@@ -441,79 +451,121 @@ namespace Psicho_Support.ViewModels
             IsInEditorMode = true;
         }
 
-        private async void SaveNote()
+        private async Task SaveNote()
         {
             if (!CanSave) return;
 
             try
             {
-                string title = EditingNote.Content
+                bool isNew = EditingNote.NoteID == 0;
+
+                // 🔹 1. Заголовок
+                var firstLine = EditingNote.Content?
                     .Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
-                    .FirstOrDefault() ?? "Заметка";
+                    .FirstOrDefault();
 
-                if (title.Length > 50)
-                    title = title.Substring(0, 47) + "...";
+                EditingNote.Title = string.IsNullOrWhiteSpace(firstLine)
+                    ? "Заметка"
+                    : (firstLine.Length > 50 ? firstLine.Substring(0, 47) + "..." : firstLine);
 
-                EditingNote.Title = title;
+                // 🔥 2. Анализ (ВАЖНО: с учетом userId)
+                var userId = _appState.CurrentUser?.UserID ?? 0;
 
                 var result = _emotionAnalyzer.AnalyzeAdvanced(EditingNote.Content);
+
                 EditingNote.StressLevel = result.StressLevel;
 
                 UpdateEmotionUI(result);
 
-                using (var db = new HealthPsicho_DBEntities())
+                // 🔥 3. Сохранение в БД (в фоне)
+                await Task.Run(() =>
                 {
-                    if (EditingNote.NoteID == 0)
+                    using (var db = new HealthPsicho_DBEntities())
                     {
-                        db.Notes.Add(EditingNote);
+                        if (isNew)
+                        {
+                            db.Notes.Add(EditingNote);
+                        }
+                        else
+                        {
+                            var dbNote = db.Notes.FirstOrDefault(n => n.NoteID == EditingNote.NoteID);
+
+                            if (dbNote != null)
+                            {
+                                dbNote.Title = EditingNote.Title;
+                                dbNote.Content = EditingNote.Content;
+                                dbNote.StressLevel = EditingNote.StressLevel;
+                            }
+                        }
+
                         db.SaveChanges();
-
-                        EditingNote.NoteID = db.Notes
-                            .OrderByDescending(n => n.CreatedAt)
-                            .First(n => n.UserID == EditingNote.UserID).NoteID;
-
-                        Notes.Insert(0, EditingNote);
                     }
-                    else
-                    {
-                        var dbNote = db.Notes.FirstOrDefault(n => n.NoteID == EditingNote.NoteID);
-                        if (dbNote != null)
-                        {
-                            dbNote.Title = EditingNote.Title;
-                            dbNote.Content = EditingNote.Content;
-                            dbNote.StressLevel = EditingNote.StressLevel;
-                            db.SaveChanges();
-                        }
+                });
 
-                        var existingNote = Notes.FirstOrDefault(n => n.NoteID == EditingNote.NoteID);
-                        if (existingNote != null)
-                        {
-                            existingNote.Title = EditingNote.Title;
-                            existingNote.Content = EditingNote.Content;
-                            existingNote.StressLevel = EditingNote.StressLevel;
-                        }
+                // 🔹 4. Обновление UI
+                if (isNew)
+                {
+                    Notes.Insert(0, EditingNote);
+                }
+                else
+                {
+                    var existing = Notes.FirstOrDefault(n => n.NoteID == EditingNote.NoteID);
+                    if (existing != null)
+                    {
+                        existing.Title = EditingNote.Title;
+                        existing.Content = EditingNote.Content;
+                        existing.StressLevel = EditingNote.StressLevel;
                     }
                 }
 
                 NotesView.Refresh();
 
-                if (_appState.IsAuthenticated)
-                    _stateService.RecalculateState(_appState.CurrentUser.UserID);
+                // 🔥 5. SELF-LEARNING (если сервис есть)
+                if (_appState.IsAuthenticated && _memoryService != null)
+                {
+                    _memoryService.AddRecord(userId, EditingNote.Content, result);
+
+                    _stateService.RecalculateState(userId);
+
+                    var realState = _stateService.CurrentValue;
+
+                    _memoryService.LearnFromFeedback(userId, realState);
+                }
 
                 UpdateStatistics();
 
-                if (EditingNote.NoteID == 0)
+                // 🔹 6. UX
+                if (isNew)
                 {
-                    await _dialogService.ShowMessageAsync("Успех", "Заметка успешно создана!", Enums.DialogType.Success);
+                    await _dialogService.ShowMessageAsync(
+                        "Готово",
+                        GetAdaptiveMessage(result),
+                        Enums.DialogType.Success);
                 }
-
 
                 BackToList();
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowMessageAsync("Ошибка", $"Ошибка сохранения: {ex.Message}", Enums.DialogType.Error);
+                await _dialogService.ShowMessageAsync(
+                    "Ошибка",
+                    $"Ошибка сохранения: {ex.Message}",
+                    Enums.DialogType.Error);
             }
+        }
+
+        private string GetAdaptiveMessage(EmotionResult result)
+        {
+            if (result.StressLevel > 75)
+                return "Мы заметили высокий уровень напряжения. Возможно, стоит немного отдохнуть.";
+
+            if (result.StressLevel > 50)
+                return "Похоже, есть напряжение. Хочешь немного разгрузить мысли?";
+
+            if (result.StressLevel > 25)
+                return "Неплохое состояние. Продолжай наблюдать за собой.";
+
+            return "Хорошее состояние. Так держать 🌿";
         }
 
         private async void DeleteNote()

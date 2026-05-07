@@ -14,37 +14,42 @@ namespace Psicho_Support.Helpers
         {
             // Позитив
             { "счастлив", (0.9, EmotionType.Happiness) },
-            { "рад", (0.8, EmotionType.Happiness) },
-            { "спокойно", (0.7, EmotionType.Calm) },
+            { "рад", (0.85, EmotionType.Happiness) },
+            { "радость", (0.9, EmotionType.Happiness) },
+
+            { "спокойно", (0.75, EmotionType.Calm) },
+            { "тихо", (0.7, EmotionType.Calm) },
             { "хорошо", (0.7, EmotionType.Calm) },
 
             // Негатив
             { "тревожно", (0.2, EmotionType.Anxiety) },
-            { "страшно", (0.2, EmotionType.Anxiety) },
+            { "страшно", (0.15, EmotionType.Anxiety) },
+
             { "устал", (0.3, EmotionType.Burnout) },
             { "выгорел", (0.1, EmotionType.Burnout) },
-            { "грустно", (0.3, EmotionType.Sadness) },
-            { "плохо", (0.3, EmotionType.Stress) },
-            { "злюсь", (0.2, EmotionType.Anger) }
+
+            { "грустно", (0.25, EmotionType.Sadness) },
+            { "плохо", (0.2, EmotionType.Stress) },
+
+            { "злюсь", (0.2, EmotionType.Anger) },
+            { "злость", (0.2, EmotionType.Anger) }
         };
 
         private readonly HashSet<string> _intensifiers = new HashSet<string>
         {
-            "очень", "сильно", "крайне", "ужасно"
+            "очень", "сильно", "крайне", "ужасно", "жутко"
         };
 
         private readonly HashSet<string> _negations = new HashSet<string>
         {
-            "не", "нет", "ни"
+            "не", "нет", "ни", "никогда"
         };
 
-        // 🔹 Старый метод (оставляем!)
         public double Analyze(string text)
         {
             return AnalyzeAdvanced(text).Score;
         }
 
-        // 🔥 Новый метод
         public EmotionResult AnalyzeAdvanced(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
@@ -54,9 +59,8 @@ namespace Psicho_Support.Helpers
                 .Where(w => !string.IsNullOrWhiteSpace(w))
                 .ToList();
 
-            double score = 0.5;
-            int count = 0;
-            double multiplier = 1.0;
+            double weightedSum = 0;
+            double totalWeight = 0;
 
             var emotionCounter = new Dictionary<EmotionType, int>();
 
@@ -64,44 +68,71 @@ namespace Psicho_Support.Helpers
             {
                 var word = words[i];
 
-                if (_intensifiers.Contains(word))
-                {
-                    multiplier = 1.5;
+                if (!_words.TryGetValue(word, out var data))
                     continue;
-                }
 
-                bool isNegated = i > 0 && _negations.Contains(words[i - 1]);
+                double weight = 1.0;
 
-                if (_words.TryGetValue(word, out var data))
-                {
-                    double wordScore = data.score;
+                // 🔥 1. проверка negation в окне 2 слов назад
+                if (IsNegated(words, i))
+                    data.score = 1 - data.score;
 
-                    // 🔁 Инверсия при "не"
-                    if (isNegated)
-                        wordScore = 1 - wordScore;
+                // 🔥 2. усилители перед словом
+                if (i > 0 && _intensifiers.Contains(words[i - 1]))
+                    weight *= 1.6;
 
-                    wordScore = ApplyMultiplier(wordScore, multiplier);
-                    multiplier = 1.0;
+                // 🔥 3. повтор слова усиливает эффект
+                int repeats = CountRepeats(words, word, i);
+                weight *= (1 + repeats * 0.15);
 
-                    score = (score * count + wordScore) / (count + 1);
-                    count++;
+                // 🔥 4. добавляем вклад
+                weightedSum += data.score * weight;
+                totalWeight += weight;
 
-                    if (!emotionCounter.ContainsKey(data.type))
-                        emotionCounter[data.type] = 0;
+                if (!emotionCounter.ContainsKey(data.type))
+                    emotionCounter[data.type] = 0;
 
-                    emotionCounter[data.type]++;
-                }
+                emotionCounter[data.type]++;
             }
 
-            int stress = ConvertScoreToStress(score);
+            double finalScore = totalWeight == 0
+                ? 0.5
+                : weightedSum / totalWeight;
+
+            int stress = ConvertScoreToStress(finalScore);
 
             return new EmotionResult
             {
-                Score = Math.Round(score, 2),
+                Score = Math.Round(finalScore, 2),
                 StressLevel = stress,
                 DominantEmotion = GetDominantEmotion(emotionCounter),
-                Confidence = CalculateConfidence(count, words.Count)
+                Confidence = CalculateConfidence(emotionCounter, words.Count)
             };
+        }
+
+        // 🔥 negation теперь работает в окне 3 слов назад
+        private bool IsNegated(List<string> words, int index)
+        {
+            for (int i = Math.Max(0, index - 3); i < index; i++)
+            {
+                if (_negations.Contains(words[i]))
+                    return true;
+            }
+            return false;
+        }
+
+        // 🔥 повтор слова
+        private int CountRepeats(List<string> words, string word, int index)
+        {
+            int count = 0;
+
+            for (int i = Math.Max(0, index - 3); i < index; i++)
+            {
+                if (words[i] == word)
+                    count++;
+            }
+
+            return count;
         }
 
         private EmotionType GetDominantEmotion(Dictionary<EmotionType, int> emotions)
@@ -112,22 +143,17 @@ namespace Psicho_Support.Helpers
             return emotions.OrderByDescending(e => e.Value).First().Key;
         }
 
-        private double CalculateConfidence(int matchedWords, int totalWords)
+        private double CalculateConfidence(Dictionary<EmotionType, int> emotions, int totalWords)
         {
             if (totalWords == 0) return 0;
-            return Math.Round((double)matchedWords / totalWords, 2);
-        }
 
-        private double ApplyMultiplier(double score, double multiplier)
-        {
-            double deviation = score - 0.5;
-            return MathHelper.Clamp(0.5 + deviation * multiplier, 0.1, 0.9);
+            int matched = emotions.Values.Sum();
+            return Math.Round((double)matched / totalWords, 2);
         }
 
         private int ConvertScoreToStress(double score)
         {
-            int stress = (int)((1 - score) * 100);
-            return MathHelper.Clamp(stress, 0, 100);
+            return MathHelper.Clamp((int)((1 - score) * 100), 0, 100);
         }
 
         private EmotionResult NeutralResult()
