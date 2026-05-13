@@ -21,7 +21,7 @@ namespace Psicho_Support.Data
         public Nullable<int> Mood { get; set; }
         public Nullable<int> StressLevel { get; set; }
         public Nullable<System.DateTime> CreatedAt { get; set; }
-
+    
         public virtual Users Users { get; set; }
     }
 }
