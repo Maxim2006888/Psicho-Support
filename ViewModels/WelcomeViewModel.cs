@@ -58,34 +58,22 @@ namespace Psicho_Support.ViewModels
 
         private void ExecuteCreateNote()
         {
-            // Используем NavigationService если доступен
-            if (NavigationService != null)
+            if (Application.Current.MainWindow is Views.UserWindow mainWindow)
             {
-                NavigationService.NavigateTo<NotesPage>();
+                mainWindow.NavigateToPage(0);
+                return;
             }
-            else
-            {
-                // Fallback для обратной совместимости
-                if (Application.Current.MainWindow is Views.UserWindow mainWindow)
-                {
-                    mainWindow.NavigateToPage(0);
-                }
-            }
+            NavigationService?.NavigateTo<NotesPage>();
         }
 
         private void ExecuteTakeTest()
         {
-            if (NavigationService != null)
+            if (Application.Current.MainWindow is Views.UserWindow mainWindow)
             {
-                NavigationService.NavigateTo<TestsPage>();
+                mainWindow.NavigateToPage(1);
+                return;
             }
-            else
-            {
-                if (Application.Current.MainWindow is Views.UserWindow mainWindow)
-                {
-                    mainWindow.NavigateToPage(1);
-                }
-            }
+            NavigationService?.NavigateTo<TestsPage>();
         }
 
         private void OnStateChanged(int newValue)
@@ -173,7 +161,12 @@ namespace Psicho_Support.ViewModels
                         int notesCount = db.Notes
                             .Count(n => n.UserID == userId &&
                                    n.CreatedAt >= today &&
-                                   n.CreatedAt < tomorrow); // tomorrow уже вычислен заранее
+                                   n.CreatedAt < tomorrow);
+
+                        int testsCount = db.TestResults
+                            .Count(t => t.UserID == userId &&
+                                   t.Date >= today &&
+                                   t.Date < tomorrow);
 
                         var todayNotes = db.Notes
                             .Where(n => n.UserID == userId &&
@@ -186,6 +179,7 @@ namespace Psicho_Support.ViewModels
                         Application.Current.Dispatcher.Invoke(() =>
                         {
                             TodayNotesCount = notesCount;
+                            TodayTestsCount = testsCount;
 
                             if (todayNotes.Any())
                             {
@@ -214,6 +208,7 @@ namespace Psicho_Support.ViewModels
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     TodayNotesCount = 0;
+                    TodayTestsCount = 0;
                     AvgStressToday = "Ошибка";
                     AvgStressColor = "#AAAAAA";
                 });

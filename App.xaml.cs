@@ -34,19 +34,10 @@ namespace Psicho_Support
 
                 Services = services.BuildServiceProvider();
 
-                // Проверяем, нужно ли показывать онбординг
-                var onboardingCompleted = Settings.Default.OnboardingCompleted;
-
-                if (!onboardingCompleted)
-                {
-                    var onboardingWindow = Services.GetRequiredService<OnboardingWindow>();
-                    onboardingWindow.Show();
-                }
-                else
-                {
-                    var mainWindow = Services.GetRequiredService<HallowWindow>();
-                    mainWindow.Show();
-                }
+                // При запуске всегда показываем приветственное окно.
+                // Онбординг запускается после успешного входа пользователя.
+                var mainWindow = Services.GetRequiredService<HallowWindow>();
+                mainWindow.Show();
             }
             catch (Exception ex)
             {
@@ -115,7 +106,7 @@ namespace Psicho_Support
             services.AddTransient<AdviceViewModel>();
             services.AddTransient<SettingsViewModel>();
             services.AddTransient<UserWindowViewModel>();
-            services.AddTransient<OnboardingViewModel>(); 
+            //services.AddTransient<OnboardingViewModel>(); 
             services.AddTransient<WelcomeStepViewModel>();
             services.AddTransient<PrivacyStepViewModel>();
             services.AddTransient<ThemeStepViewModel>();
