@@ -582,7 +582,37 @@ namespace Psicho_Support.ViewModels
             TestResultMessage = BuildResultMessage(percentage);
             ResultColor = GetResultColor(percentage);
 
+            SaveTestResult();
             CommandManager.InvalidateRequerySuggested();
+        }
+
+        private void SaveTestResult()
+        {
+            var userId = _appState.CurrentUser?.UserID;
+            if (!userId.HasValue || SelectedTest == null)
+            {
+                return;
+            }
+
+            try
+            {
+                using (var db = new HealthPsicho_DBEntities())
+                {
+                    db.TestResults.Add(new TestResults
+                    {
+                        UserID = userId.Value,
+                        TestID = SelectedTest.TestID,
+                        Score = TotalScore,
+                        Date = DateTime.Now
+                    });
+
+                    db.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка сохранения результата теста: {ex.Message}");
+            }
         }
 
         private string BuildResultMessage(double percentage)
