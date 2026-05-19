@@ -3,6 +3,7 @@ using Psicho_Support.Data;
 using Psicho_Support.Enums;
 using Psicho_Support.Helpers;
 using Psicho_Support.Services;
+using Psicho_Support.Core;
 using Psicho_Support.Services.Interfaces;
 using Psicho_Support.Views.Pages;
 using System;
@@ -17,6 +18,7 @@ namespace Psicho_Support.ViewModels
     {
         private readonly UserStateService _stateService;
         private readonly AppSession _appSession;
+        private readonly AppState _appState;
         private DispatcherTimer _updateTimer;
         private bool _disposed = false;
 
@@ -25,11 +27,17 @@ namespace Psicho_Support.ViewModels
         public ICommand TakeTestCommand { get; }
 
         // Конструктор с поддержкой NavigationService
-        public WelcomeViewModel(IDialogService dialogService, INavigationService navigationService, AppSession appSession)
+        public WelcomeViewModel(
+            IDialogService dialogService,
+            INavigationService navigationService,
+            AppSession appSession,
+            AppState appState,
+            UserStateService stateService)
             : base(dialogService, navigationService)
         {
             _appSession = appSession ?? throw new ArgumentNullException(nameof(appSession));
-            _stateService = new UserStateService();
+            _appState = appState ?? throw new ArgumentNullException(nameof(appState));
+            _stateService = stateService ?? throw new ArgumentNullException(nameof(stateService));
             _stateService.StateChanged += OnStateChanged;
 
             CreateNoteCommand = new RelayCommand(ExecuteCreateNote);
@@ -39,6 +47,7 @@ namespace Psicho_Support.ViewModels
             LoadUserData();
             LoadDailyQuote();
             LoadStatisticsAsync();
+            InitializeCurrentState();
             UpdateAdvice();
 
             _updateTimer = new DispatcherTimer();
@@ -103,6 +112,20 @@ namespace Psicho_Support.ViewModels
                 else
                     GreetingMessage = "Добрый вечер! Отличное время для рефлексии.";
             }
+        }
+
+        private void InitializeCurrentState()
+        {
+            if (_appState?.CurrentUser == null)
+            {
+                StateValue = _stateService.CurrentValue;
+                UpdateStateProperties();
+                return;
+            }
+
+            _stateService.RecalculateState(_appState.CurrentUser.UserID);
+            StateValue = _stateService.CurrentValue;
+            UpdateStateProperties();
         }
 
         private void LoadDailyQuote()
@@ -370,7 +393,6 @@ namespace Psicho_Support.ViewModels
                 if (_stateService != null)
                 {
                     _stateService.StateChanged -= OnStateChanged;
-                    _stateService.Dispose();
                 }
 
                 _disposed = true;

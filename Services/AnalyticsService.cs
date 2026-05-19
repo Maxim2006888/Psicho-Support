@@ -136,6 +136,46 @@ namespace Psicho_Support.Services
             }
         }
 
+        public int GetCurrentStateValue(int userId)
+        {
+            try
+            {
+                using (var db = new HealthPsicho_DBEntities())
+                {
+                    db.Configuration.LazyLoadingEnabled = false;
+                    db.Configuration.ProxyCreationEnabled = false;
+
+                    var stressNotes = db.Notes
+                        .Where(n => n.UserID == userId && n.StressLevel.HasValue)
+                        .OrderByDescending(n => n.CreatedAt)
+                        .Take(10)
+                        .Select(n => n.StressLevel.Value)
+                        .ToList();
+
+                    if (!stressNotes.Any())
+                    {
+                        return 75;
+                    }
+
+                    var avgStress = stressNotes.Average();
+                    var recent = stressNotes.Take(3).ToList();
+                    var recentAvg = recent.Any() ? recent.Average() : avgStress;
+                    var weightedStress = (avgStress * 0.6) + (recentAvg * 0.4);
+
+                    var value = 100 - (int)Math.Round(weightedStress);
+                    if (value < 0) return 0;
+                    if (value > 100) return 100;
+                    return value;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetCurrentStateValue error: {ex.Message}");
+                return 75;
+            }
+        }
+
+
         public int GetPreviousStateValue(int userId)
         {
             try

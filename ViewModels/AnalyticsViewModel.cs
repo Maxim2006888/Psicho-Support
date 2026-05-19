@@ -318,8 +318,8 @@ namespace Psicho_Support.ViewModels
                         AverageSessionDuration = _analyticsService.GetAverageSessionDuration(userId),
                         ActivityLast7Days = _analyticsService.GetActivityForLast7Days(userId),
 
-                        // 🔥 текущее состояние берём напрямую
-                        CurrentStateValue = _stateService.CurrentValue,
+                        // 🔥 пересчитываем состояние из актуальных данных пользователя
+                        CurrentStateValue = _analyticsService.GetCurrentStateValue(userId),
 
                         PreviousStateValue = _analyticsService.GetPreviousStateValue(userId),
                         AverageStressLastWeek = _analyticsService.GetAverageStressLastWeek(userId),
@@ -332,8 +332,9 @@ namespace Psicho_Support.ViewModels
                 PreviousWeekStress = data.AverageStressPreviousWeek;
                 CurrentWeekStress = data.AverageStressLastWeek;
 
-                // 🔥 График отдельно (не блокируем основной поток)
-                _ = Task.Run(() => LoadStressChart(userId));
+                // 🔥 График отдельно, затем безопасное обновление на UI-потоке
+                var stressData = await Task.Run(() => _analyticsService.GetStressDynamics(userId, 7));
+                UpdateStressChart(stressData);
 
                 // 🔥 (опционально) — сюда можно добавить:
                 // ModelConfidence = _memory.GetConfidence(userId);
@@ -349,15 +350,43 @@ namespace Psicho_Support.ViewModels
             }
         }
 
-        private void LoadStressChart(int userId)
+        private void UpdateStressChart(List<StressPoint> data)
         {
             try
             {
-                var data = _analyticsService.GetStressDynamics(userId, 7);
-
+                
                 if (data == null || !data.Any())
                 {
-                    System.Diagnostics.Debug.WriteLine("No stress data available");
+                    StressSeries = new ISeries[]
+                    {
+                        new LineSeries<double>
+                        {
+                            Values = new double[] { 0 },
+                            GeometrySize = 0,
+                            Fill = null,
+                            Stroke = new SolidColorPaint(SKColor.Parse("#5A4FCF"), 2),
+                            Name = "Нет данных"
+                        }
+                    };
+
+                    XAxes = new Axis[]
+                    {
+                        new Axis
+                        {
+                            Labels = new[] { "Нет данных" },
+                            LabelsPaint = new SolidColorPaint(SKColor.Parse("#AAAAAA"))
+                        }
+                    };
+
+                    YAxes = new Axis[]
+                    {
+                        new Axis
+                        {
+                            MinLimit = 0,
+                            MaxLimit = 100,
+                            LabelsPaint = new SolidColorPaint(SKColor.Parse("#AAAAAA"))
+                        }
+                    };
                     return;
                 }
 
@@ -366,11 +395,11 @@ namespace Psicho_Support.ViewModels
                     new LineSeries<double>
                     {
                         Values = data.Select(d => (double)d.Stress).ToArray(),
-                        GeometrySize = 8,
-                        LineSmoothness = 0.6,
-                        Fill = null,
-                        Stroke = new SolidColorPaint(SKColor.Parse("#5A4FCF"), 2),
-                        GeometryStroke = new SolidColorPaint(SKColor.Parse("#5A4FCF")),
+                        GeometrySize = 9,
+                        LineSmoothness = 0.45,
+                        Fill = new SolidColorPaint(new SKColor(90, 79, 207, 35)),
+                        Stroke = new SolidColorPaint(SKColor.Parse("#5A4FCF"), 3),
+                        GeometryStroke = new SolidColorPaint(SKColor.Parse("#FFFFFF"), 2),
                         GeometryFill = new SolidColorPaint(SKColor.Parse("#5A4FCF")),
                         Name = "Уровень стресса"
                     }
@@ -382,10 +411,9 @@ namespace Psicho_Support.ViewModels
                     {
                         Labels = data.Select(d => d.DayOfWeek).ToArray(),
                         LabelsRotation = 0,
-                        Name = "День недели",
-                        NamePaint = new SolidColorPaint(SKColor.Parse("#AAAAAA")),
-                        LabelsPaint = new SolidColorPaint(SKColor.Parse("#AAAAAA")),
-                        TicksPaint = new SolidColorPaint(SKColor.Parse("#555555"))
+                        LabelsPaint = new SolidColorPaint(SKColor.Parse("#C2C2D6")),
+                        TextSize = 11,
+                        SeparatorsPaint = null
                     }
                 };
 
@@ -395,16 +423,18 @@ namespace Psicho_Support.ViewModels
                     {
                         MinLimit = 0,
                         MaxLimit = 100,
-                        Name = "Уровень стресса (%)",
+                        MinStep = 20,
+                        Name = "Стресс, %",
                         NamePaint = new SolidColorPaint(SKColor.Parse("#AAAAAA")),
                         LabelsPaint = new SolidColorPaint(SKColor.Parse("#AAAAAA")),
+                        SeparatorsPaint = new SolidColorPaint(new SKColor(255, 255, 255, 24)),
                         TicksPaint = new SolidColorPaint(SKColor.Parse("#555555"))
                     }
                 };
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"LoadStressChart error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"UpdateStressChart error: {ex.Message}");
             }
         }
 
