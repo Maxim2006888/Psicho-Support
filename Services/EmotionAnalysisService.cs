@@ -27,7 +27,6 @@ namespace Psicho_Support.Services
             int stress = 0;
             EmotionType emotion = EmotionType.Neutral;
 
-            // 🔥 Простейший анализ (можно улучшать)
             if (text.Contains("устал") || text.Contains("давит") || text.Contains("не могу"))
             {
                 stress += 40;
@@ -58,7 +57,7 @@ namespace Psicho_Support.Services
                 emotion = EmotionType.Happiness;
             }
 
-            // Нормализация
+           
             stress = Math.Max(0, Math.Min(100, stress));
 
             var result = new EmotionResult

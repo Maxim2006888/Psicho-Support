@@ -19,7 +19,7 @@
 
             <StackPanel Margin="30">
 
-                <!-- Заголовок -->
+                
                 <TextBlock Text="Регистрация"
                            FontSize="24"
                            FontWeight="Bold"
@@ -27,7 +27,7 @@
                            HorizontalAlignment="Center"
                            Margin="0,0,0,30"/>
 
-                <!-- Логин -->
+                
                 <TextBlock Text="Как можно к вам обращаться"
                            Foreground="#AAAAAA"
                            FontSize="12"
@@ -50,7 +50,7 @@
                                VerticalAlignment="Center"/>
                 </Grid>
 
-                <!-- Пароль -->
+                
                 <TextBlock Text="Пароль"
                            Foreground="#AAAAAA"
                            FontSize="12"
@@ -73,12 +73,12 @@
                                VerticalAlignment="Center"/>
                 </Grid>
 
-                <!-- Индикатор сложности пароля -->
+                
                 <TextBlock x:Name="PasswordStrengthIndicator"
                            FontSize="11"
                            Margin="0,5,0,0"/>
 
-                <!-- Подтверждение пароля -->
+                
                 <TextBlock Text="Подтверждение пароля"
                            Foreground="#AAAAAA"
                            FontSize="12"
@@ -101,12 +101,12 @@
                                VerticalAlignment="Center"/>
                 </Grid>
 
-                <!-- Индикатор совпадения паролей -->
+                
                 <TextBlock x:Name="PasswordMatchIndicator"
                            FontSize="11"
                            Margin="0,5,0,15"/>
 
-                <!-- Кнопки -->
+                
                 <Button Content="Зарегистрироваться"
                         Click="Register_Click"
                         Height="40"

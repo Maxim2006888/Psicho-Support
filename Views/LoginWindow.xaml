@@ -12,13 +12,14 @@
 
         <StackPanel VerticalAlignment="Center">
 
-            <TextBlock Text="HealthPsicho Support"
+            <TextBlock Text="Вход в помощника"
                        FontSize="24"
                        FontWeight="Bold"
+                       Foreground="White"
                        Margin="0 0 0 30"
                        HorizontalAlignment="Center"/>
 
-            <!-- LOGIN -->
+            
 
             <Grid Margin="0 10">
 
@@ -45,7 +46,7 @@
             </Grid>
 
 
-            <!-- PASSWORD -->
+            
 
             <Grid Margin="0 10">
 
@@ -72,7 +73,7 @@
             </Grid>
 
 
-            <!-- DETAILS TEXT -->
+            
 
             <TextBlock x:Name="DetailsText"
                        Margin="0 10"
@@ -81,7 +82,7 @@
                        Visibility="Collapsed"/>
 
 
-            <!-- LOGIN BUTTON -->
+            
 
             <Button Content="Войти"
                     Height="40"

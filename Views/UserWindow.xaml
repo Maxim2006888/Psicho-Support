@@ -32,7 +32,7 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel>
-                    <TextBlock Text="HealthPsicho"
+                    <TextBlock Text=" "
                                FontSize="20"
                                FontWeight="Bold"
                                Foreground="{DynamicResource TextPrimaryBrush}"/>

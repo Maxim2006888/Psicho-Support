@@ -6,7 +6,7 @@ namespace Psicho_Support.Services
     {
         public int PredictStress(int current, double trend)
         {
-            // простая экстраполяция
+            
             int prediction = current + (int)(trend * 10);
 
             if (prediction < 0) return 0;

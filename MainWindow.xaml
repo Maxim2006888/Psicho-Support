@@ -33,13 +33,13 @@
             <StackPanel VerticalAlignment="Center"
                         HorizontalAlignment="Center">
 
-                <TextBlock Text="HealthPsicho"
+                <TextBlock Text="Ваш помощник"
                            FontSize="28"
                            FontWeight="Bold"
                            Foreground="White"
                            HorizontalAlignment="Center"/>
 
-                <TextBlock Text="Support"
+                <TextBlock Text="загружается"
                            FontSize="16"
                            Foreground="#A0A0C0"
                            HorizontalAlignment="Center"
