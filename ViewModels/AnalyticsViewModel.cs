@@ -239,6 +239,20 @@ namespace Psicho_Support.ViewModels
             set => SetProperty(ref _weekActivityPercentage, value);
         }
 
+        private int _todayNotesCount;
+        public int TodayNotesCount
+        {
+            get => _todayNotesCount;
+            set => SetProperty(ref _todayNotesCount, value);
+        }
+
+        private int _todayTestsCount;
+        public int TodayTestsCount
+        {
+            get => _todayTestsCount;
+            set => SetProperty(ref _todayTestsCount, value);
+        }
+
         public ICommand RefreshCommand { get; }
 
         public bool IsSection1Expanded
@@ -307,6 +321,21 @@ namespace Psicho_Support.ViewModels
             try
             {
                 var userId = _appState.CurrentUser.UserID;
+                var today = DateTime.Today;
+                var tomorrow = today.AddDays(1);
+
+                var todayCounters = await Task.Run(() =>
+                {
+                    using (var db = new HealthPsicho_DBEntities())
+                    {
+                        var notes = db.Notes.Count(n => n.UserID == userId && n.CreatedAt >= today && n.CreatedAt < tomorrow);
+                        var tests = db.TestResults.Count(t => t.UserID == userId && t.Date >= today && t.Date < tomorrow);
+                        return (notes, tests);
+                    }
+                });
+
+                TodayNotesCount = todayCounters.notes;
+                TodayTestsCount = todayCounters.tests;
 
                 // 🔹 Загружаем данные в фоне
                 var data = await Task.Run(() =>
@@ -343,6 +372,8 @@ namespace Psicho_Support.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"LoadAnalyticsAsync error: {ex}");
+                TodayNotesCount = 0;
+                TodayTestsCount = 0;
             }
             finally
             {

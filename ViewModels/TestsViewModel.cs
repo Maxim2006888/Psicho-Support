@@ -598,10 +598,12 @@ namespace Psicho_Support.ViewModels
             {
                 using (var db = new HealthPsicho_DBEntities())
                 {
+                    var testId = ResolveTestId(db, SelectedTest);
+
                     db.TestResults.Add(new TestResults
                     {
                         UserID = userId.Value,
-                        TestID = SelectedTest.TestID,
+                        TestID = testId,
                         Score = TotalScore,
                         Date = DateTime.Now
                     });
@@ -611,8 +613,33 @@ namespace Psicho_Support.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Ошибка сохранения результата теста: {ex.Message}");
+                var details = ex.InnerException?.Message ?? ex.Message;
+                System.Diagnostics.Debug.WriteLine($"Ошибка сохранения результата теста: {details}");
             }
+        }
+
+        private int ResolveTestId(HealthPsicho_DBEntities db, Tests selectedTest)
+        {
+            var byId = db.Tests.FirstOrDefault(t => t.TestID == selectedTest.TestID);
+            if (byId != null)
+            {
+                return byId.TestID;
+            }
+
+            var byName = db.Tests.FirstOrDefault(t => t.TestName == selectedTest.TestName);
+            if (byName != null)
+            {
+                return byName.TestID;
+            }
+
+            var created = db.Tests.Add(new Tests
+            {
+                TestName = selectedTest.TestName,
+                Description = selectedTest.Description
+            });
+
+            db.SaveChanges();
+            return created.TestID;
         }
 
         private string BuildResultMessage(double percentage)
