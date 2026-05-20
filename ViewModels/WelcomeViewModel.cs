@@ -58,22 +58,53 @@ namespace Psicho_Support.ViewModels
 
         private void ExecuteCreateNote()
         {
-            if (Application.Current.MainWindow is Views.UserWindow mainWindow)
+            // Используем NavigationService если доступен
+            if (NavigationService != null)
             {
-                mainWindow.NavigateToPage(0);
-                return;
+                NavigationService.NavigateTo<NotesPage>();
             }
-            NavigationService?.NavigateTo<NotesPage>();
+            else
+            {
+                // Fallback для обратной совместимости
+                if (Application.Current.MainWindow is Views.UserWindow mainWindow)
+                {
+                    mainWindow.NavigateToPage(0);
+                }
+            }
+            NavigateViaUserWindow(0);
         }
 
         private void ExecuteTakeTest()
         {
-            if (Application.Current.MainWindow is Views.UserWindow mainWindow)
+            if (NavigationService != null)
             {
-                mainWindow.NavigateToPage(1);
+                NavigationService.NavigateTo<TestsPage>();
+            }
+            else
+                NavigateViaUserWindow(1);
+        }
+
+        private void NavigateViaUserWindow(int pageIndex)
+        {
+            var userWindow = Application.Current.Windows
+                .OfType<Views.UserWindow>()
+                .FirstOrDefault(w => w.IsVisible);
+
+            if (userWindow != null)
+            {
+                if (Application.Current.MainWindow is Views.UserWindow mainWindow)
+                {
+                    mainWindow.NavigateToPage(1);
+                }
+                userWindow.NavigateToPage(pageIndex);
                 return;
             }
-            NavigationService?.NavigateTo<TestsPage>();
+
+            DialogService?.Show(
+                "Навигация недоступна",
+                "Не удалось получить активное пользовательское окно для перехода.",
+                DialogType.Warning,
+                Application.Current?.MainWindow);
         }
 
         private void OnStateChanged(int newValue)
