@@ -14,7 +14,7 @@ namespace Psicho_Support.Services
             {
                 var dialog = new CustomDialogWindow(title, message, type);
 
-                // Безопасная установка Owner
+                
                 if (owner is Window ownerWindow && ownerWindow.IsLoaded)
                 {
                     dialog.Owner = ownerWindow;
@@ -23,7 +23,7 @@ namespace Psicho_Support.Services
                 {
                     dialog.Owner = Application.Current.MainWindow;
                 }
-                // Если нет окна-владельца, не устанавливаем Owner
+                
 
                 dialog.ShowDialog();
             });
@@ -53,7 +53,7 @@ namespace Psicho_Support.Services
         {
             var dialog = new CustomDialogWindow(title, message, DialogType.Warning, true);
 
-            // Безопасная установка Owner
+            
             if (owner != null && owner.IsLoaded)
             {
                 dialog.Owner = owner;
@@ -62,7 +62,7 @@ namespace Psicho_Support.Services
             {
                 dialog.Owner = Application.Current.MainWindow;
             }
-            // Если нет окна-владельца, не устанавливаем Owner
+            
 
             return dialog.ShowDialog() == true;
         }

@@ -181,16 +181,27 @@ namespace Psicho_Support.ViewModels
 
         private IEnumerable<Tests> GetAvailableTestsSource()
         {
+            var builtInTests = CreateBuiltInTests().ToList();
+
             try
             {
                 using (var db = new HealthPsicho_DBEntities())
                 {
-                    var tests = db.Tests.ToList();
+                    var dbTests = db.Tests.ToList();
 
-                    if (tests.Count > 0)
+                    if (dbTests.Count == 0)
                     {
-                        return tests;
+                        return builtInTests;
                     }
+                    var merged = builtInTests
+                        .Concat(dbTests)
+                        .GroupBy(t => string.IsNullOrWhiteSpace(t.TestName)
+                            ? $"id:{t.TestID}"
+                            : $"name:{t.TestName.Trim().ToLowerInvariant()}")
+                        .Select(g => g.First())
+                        .ToList();
+
+                    return merged;
                 }
             }
             catch
@@ -198,7 +209,7 @@ namespace Psicho_Support.ViewModels
                 // Если база данных недоступна, используем встроенный каталог тестов.
             }
 
-            return CreateBuiltInTests();
+            return builtInTests;
         }
 
         private IEnumerable<Tests> CreateBuiltInTests()

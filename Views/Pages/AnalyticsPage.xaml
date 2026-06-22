@@ -367,18 +367,48 @@
                         <!-- 📈 График стресса -->
                         <Border Background="#1E1E2F" CornerRadius="12" Padding="12" Margin="0,10,0,0">
                             <StackPanel>
-                                <TextBlock Text="📈 Динамика стресса"
+                                <TextBlock Text="📈 Динамика состояния"
                                    FontSize="12"
                                    FontWeight="SemiBold"
                                    Foreground="#AAAAAA"
-                                   Margin="0,0,0,8"/>
+                                  Margin="0,0,0,4"/>
+                                <TextBlock Text="Показывает среднее состояние по дням: чем выше линия, тем лучше самочувствие."
+                                   FontSize="11"
+                                   Foreground="#77778A"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,10"/>
 
-                                <lvc:CartesianChart
-                                    Series="{Binding StressSeries}"
-                                    XAxes="{Binding XAxes}"
-                                    YAxes="{Binding YAxes}"
-                                    Height="200"
-                                    AnimationsSpeed="0:0:0.6"/>
+                                <Grid>
+                                    <lvc:CartesianChart
+                                        Series="{Binding StressSeries}"
+                                        XAxes="{Binding XAxes}"
+                                        YAxes="{Binding YAxes}"
+                                        Height="230"
+                                        Background="Transparent"
+                                        LegendPosition="Hidden"
+                                        AnimationsSpeed="0:0:0.6"
+                                        Visibility="{Binding HasChartData, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    <Border Height="230"
+                                            Background="#242438"
+                                            BorderBrush="#3A3A4D"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Visibility="{Binding HasChartData, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}">
+                                        <TextBlock Text="Нет данных для графика: за последние 7 дней не найдены заметки с уровнем стресса."
+                                                   Foreground="#AAAAAA"
+                                                   FontSize="12"
+                                                   TextWrapping="Wrap"
+                                                   TextAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="20"/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Text="{Binding ChartDebugText}"
+                                   FontSize="10"
+                                   Foreground="#77778A"
+                                   TextWrapping="Wrap"
+                                   Margin="0,8,0,0"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>

@@ -6,14 +6,11 @@ using System.Threading.Tasks;
 
 namespace Psicho_Support.Models
 {
-    public enum EmotionalState
+    public enum EmotionalPhase
     {
-        Stable,
-        Neutral,
-        MildStress,
-        HighStress,
-        AnxietyPeak,
-        Burnout,
-        Recovery
+        Calm,
+        Tension,
+        Recovery,
+        BurnoutRisk
     }
 }

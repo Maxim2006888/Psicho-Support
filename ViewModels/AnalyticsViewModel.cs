@@ -14,6 +14,7 @@ using SkiaSharp;
 using System.Collections.Generic;
 using System.Linq;
 using Psicho_Support.Data;
+using Psicho_Support.Models;
 
 namespace Psicho_Support.ViewModels
 {
@@ -39,10 +40,11 @@ namespace Psicho_Support.ViewModels
         private readonly AppSession _session;
         private readonly AppState _appState;
         private readonly UserStateService _stateService;
+        private readonly TimelineAnalyticsService _timelineAnalytics;
+        private string _stressDynamicsDebugSummary;
 
         private AnalyticsData _data;
 
-        // ✅ Добавляем недостающие поля
         private bool _isInitialized = false;
         private int _currentUserId = -1;
 
@@ -69,71 +71,33 @@ namespace Psicho_Support.ViewModels
         private ISeries[] _stressSeries;
         private Axis[] _xAxes;
         private Axis[] _yAxes;
+        private string _chartDebugText;
+        private bool _hasChartData;
 
         // Секции
         private bool _isSection1Expanded = true;
         private bool _isSection2Expanded = false;
         private bool _isSection3Expanded = false;
 
-        public ISeries[] StressSeries
+        private int _todayNotesCount;
+        private int _todayTestsCount;
+        private string _phaseAccentColor = "#5A4FCF";
+        private double _phaseGlowOpacity = 0.22;
+        private double _phaseAnimationSpeed = 0.6;
+        private int _previousWeekStress;
+        private int _currentWeekStress;
+
+        public string ChartDebugText
         {
-            get => _stressSeries;
-            set => SetProperty(ref _stressSeries, value);
+            get => _chartDebugText;
+            set => SetProperty(ref _chartDebugText, value);
+
         }
 
-        public Axis[] XAxes
+        public bool HasChartData
         {
-            get => _xAxes;
-            set => SetProperty(ref _xAxes, value);
-        }
-
-        public Axis[] YAxes
-        {
-            get => _yAxes;
-            set => SetProperty(ref _yAxes, value);
-        }
-
-        public ICommand ToggleSection1Command { get; }
-        public ICommand ToggleSection2Command { get; }
-        public ICommand ToggleSection3Command { get; }
-
-        // ✅ Добавляем свойство IsInitialized
-        public bool IsInitialized
-        {
-            get => _isInitialized;
-            set => SetProperty(ref _isInitialized, value);
-        }
-
-        public AnalyticsViewModel(
-            AnalyticsService analyticsService,
-            AppSession session,
-            AppState appState,
-            UserStateService stateService,
-            IDialogService dialogService,
-            INavigationService navigationService)
-            : base(dialogService, navigationService)
-        {
-            Title = "Аналитика";
-
-            _analyticsService = analyticsService;
-            _session = session;
-            _appState = appState ?? throw new ArgumentNullException(nameof(appState));
-            _stateService = stateService ?? throw new ArgumentNullException(nameof(stateService));
-
-            ToggleSection1Command = new RelayCommand(() => IsSection1Expanded = !IsSection1Expanded);
-            ToggleSection2Command = new RelayCommand(() => IsSection2Expanded = !IsSection2Expanded);
-            ToggleSection3Command = new RelayCommand(() => IsSection3Expanded = !IsSection3Expanded);
-
-            _refreshTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(30) // ✅ Изменяем на 30 секунд для фонового обновления
-            };
-
-            _refreshTimer.Tick += async (s, e) => await RefreshDataAsync();
-
-            RefreshCommand = new RelayCommand(async () => await RefreshDataAsync());
-
-            _appState.OnUserChanged += OnUserChanged;
+            get => _hasChartData;
+            set => SetProperty(ref _hasChartData, value);
         }
 
         public AnalyticsData Data
@@ -239,21 +203,71 @@ namespace Psicho_Support.ViewModels
             set => SetProperty(ref _weekActivityPercentage, value);
         }
 
-        private int _todayNotesCount;
         public int TodayNotesCount
         {
             get => _todayNotesCount;
             set => SetProperty(ref _todayNotesCount, value);
         }
 
-        private int _todayTestsCount;
         public int TodayTestsCount
         {
             get => _todayTestsCount;
             set => SetProperty(ref _todayTestsCount, value);
         }
 
-        public ICommand RefreshCommand { get; }
+        public string PhaseAccentColor
+        {
+            get => _phaseAccentColor;
+            set => SetProperty(ref _phaseAccentColor, value);
+        }
+
+        public double PhaseGlowOpacity
+        {
+            get => _phaseGlowOpacity;
+            set => SetProperty(ref _phaseGlowOpacity, value);
+        }
+
+        public double PhaseAnimationSpeed
+        {
+            get => _phaseAnimationSpeed;
+            set => SetProperty(ref _phaseAnimationSpeed, value);
+        }
+
+        public int PreviousWeekStress
+        {
+            get => _previousWeekStress;
+            set => SetProperty(ref _previousWeekStress, value);
+        }
+
+        public int CurrentWeekStress
+        {
+            get => _currentWeekStress;
+            set => SetProperty(ref _currentWeekStress, value);
+        }
+
+        public ISeries[] StressSeries
+        {
+            get => _stressSeries;
+            set => SetProperty(ref _stressSeries, value);
+        }
+
+        public Axis[] XAxes
+        {
+            get => _xAxes;
+            set => SetProperty(ref _xAxes, value);
+        }
+
+        public Axis[] YAxes
+        {
+            get => _yAxes;
+            set => SetProperty(ref _yAxes, value);
+        }
+
+        public bool IsInitialized
+        {
+            get => _isInitialized;
+            set => SetProperty(ref _isInitialized, value);
+        }
 
         public bool IsSection1Expanded
         {
@@ -273,12 +287,56 @@ namespace Psicho_Support.ViewModels
             set => SetProperty(ref _isSection3Expanded, value);
         }
 
-        public int PreviousWeekStress { get; set; }
-        public int CurrentWeekStress { get; set; }
+
+
+        public ICommand ToggleSection1Command { get; }
+        public ICommand ToggleSection2Command { get; }
+        public ICommand ToggleSection3Command { get; }
+        public ICommand RefreshCommand { get; }
+
+        public AnalyticsViewModel(
+            AnalyticsService analyticsService,
+            AppSession session,
+            AppState appState,
+            UserStateService stateService,
+            TimelineAnalyticsService timelineAnalytics,
+            IDialogService dialogService,
+            INavigationService navigationService)
+            : base(dialogService, navigationService)
+        {
+            Title = "Аналитика";
+
+            _analyticsService = analyticsService;
+            _session = session;
+            _appState = appState ?? throw new ArgumentNullException(nameof(appState));
+            _stateService = stateService ?? throw new ArgumentNullException(nameof(stateService));
+            _timelineAnalytics = timelineAnalytics ?? throw new ArgumentNullException(nameof(timelineAnalytics));
+
+            // Инициализация полей (можно передать через DI, если они зарегистрированы)
+            _memory = null; // Замените на реальную инициализацию
+            _trend = null;  // Замените на реальную инициализацию
+
+            ToggleSection1Command = new RelayCommand(() => IsSection1Expanded = !IsSection1Expanded);
+            ToggleSection2Command = new RelayCommand(() => IsSection2Expanded = !IsSection2Expanded);
+            ToggleSection3Command = new RelayCommand(() => IsSection3Expanded = !IsSection3Expanded);
+
+            _refreshTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(30)
+            };
+
+            _refreshTimer.Tick += async (s, e) => await RefreshDataAsync();
+
+            RefreshCommand = new RelayCommand(async () => await RefreshDataAsync());
+
+            if (_appState != null)
+            {
+                _appState.OnUserChanged += OnUserChanged;
+            }
+        }
 
         private void OnUserChanged(object sender, Users user)
         {
-            // При смене пользователя обновляем данные
             if (user != null)
             {
                 _ = LoadAnalyticsAsync();
@@ -287,15 +345,13 @@ namespace Psicho_Support.ViewModels
 
         public override async Task InitializeAsync(object parameter = null)
         {
-            // Загружаем данные только если они ещё не загружены или пользователь изменился
-            if (!_isInitialized || _currentUserId != _appState.CurrentUser?.UserID)
+            if (!_isInitialized || _currentUserId != _appState?.CurrentUser?.UserID)
             {
                 await LoadAnalyticsAsync();
                 _isInitialized = true;
-                _currentUserId = _appState.CurrentUser?.UserID ?? -1;
+                _currentUserId = _appState?.CurrentUser?.UserID ?? -1;
             }
 
-            // Запускаем таймер фонового обновления
             if (!_refreshTimer.IsEnabled)
             {
                 _refreshTimer.Start();
@@ -304,8 +360,7 @@ namespace Psicho_Support.ViewModels
 
         private async Task RefreshDataAsync()
         {
-            // Фоновое обновление данных
-            if (_appState.IsAuthenticated && !IsBusy)
+            if (_appState != null && _appState.IsAuthenticated && !IsBusy)
             {
                 await LoadAnalyticsAsync();
             }
@@ -313,7 +368,7 @@ namespace Psicho_Support.ViewModels
 
         private async Task LoadAnalyticsAsync()
         {
-            if (!_appState.IsAuthenticated || IsBusy)
+            if (_appState == null || !_appState.IsAuthenticated || IsBusy)
                 return;
 
             IsBusy = true;
@@ -335,9 +390,8 @@ namespace Psicho_Support.ViewModels
                 });
 
                 TodayNotesCount = todayCounters.notes;
-                TodayTestsCount = todayCounters.tests;
+                TodayTestsCount = todayCounters.tests;   
 
-                // 🔹 Загружаем данные в фоне
                 var data = await Task.Run(() =>
                 {
                     return new AnalyticsData
@@ -346,28 +400,26 @@ namespace Psicho_Support.ViewModels
                         SessionCount = _analyticsService.GetSessionCount(userId),
                         AverageSessionDuration = _analyticsService.GetAverageSessionDuration(userId),
                         ActivityLast7Days = _analyticsService.GetActivityForLast7Days(userId),
-
-                        // 🔥 пересчитываем состояние из актуальных данных пользователя
                         CurrentStateValue = _analyticsService.GetCurrentStateValue(userId),
-
                         PreviousStateValue = _analyticsService.GetPreviousStateValue(userId),
                         AverageStressLastWeek = _analyticsService.GetAverageStressLastWeek(userId),
                         AverageStressPreviousWeek = _analyticsService.GetAverageStressPreviousWeek(userId)
                     };
                 });
 
-                // 🔹 Обновляем UI
                 Data = data;
+
+                var profile = await Task.Run(() => _timelineAnalytics.BuildProfile(userId, 7));
                 PreviousWeekStress = data.AverageStressPreviousWeek;
-                CurrentWeekStress = data.AverageStressLastWeek;
+                CurrentWeekStress = (int)Math.Round(profile.AverageStress);
+                StateAdvice = BuildProfileAdvice(profile);
 
-                // 🔥 График отдельно, затем безопасное обновление на UI-потоке
-                var stressData = await Task.Run(() => _analyticsService.GetStressDynamics(userId, 7));
+
+                var stressDiagnostics = await Task.Run(() => _analyticsService.GetStressDynamicsDebugSummary(userId, 7)); 
+                var stressData = await Task.Run(() => _timelineAnalytics.BuildStressDynamics(userId, 7));
+
+                _stressDynamicsDebugSummary = stressDiagnostics;
                 UpdateStressChart(stressData);
-
-                // 🔥 (опционально) — сюда можно добавить:
-                // ModelConfidence = _memory.GetConfidence(userId);
-
             }
             catch (Exception ex)
             {
@@ -385,54 +437,114 @@ namespace Psicho_Support.ViewModels
         {
             try
             {
-                
-                if (data == null || !data.Any())
+
+                System.Diagnostics.Debug.WriteLine($"📊 UpdateStressChart: получено {(data?.Count ?? 0)} точек");
+
+
+                var sourceData = data ?? new List<StressPoint>();
+                var chartData = sourceData
+                    .Where(d => d.HasData) 
+                    .OrderBy(d => d.Date)
+                    .ToList();
+
+                var sourceCount = sourceData.Count;
+                var realCount = chartData.Count;
+
+                if (!chartData.Any())
                 {
-                    StressSeries = new ISeries[]
-                    {
-                        new LineSeries<double>
-                        {
-                            Values = new double[] { 0 },
-                            GeometrySize = 0,
-                            Fill = null,
-                            Stroke = new SolidColorPaint(SKColor.Parse("#5A4FCF"), 2),
-                            Name = "Нет данных"
-                        }
-                    };
-
-                    XAxes = new Axis[]
-                    {
-                        new Axis
-                        {
-                            Labels = new[] { "Нет данных" },
-                            LabelsPaint = new SolidColorPaint(SKColor.Parse("#AAAAAA"))
-                        }
-                    };
-
-                    YAxes = new Axis[]
-                    {
-                        new Axis
-                        {
-                            MinLimit = 0,
-                            MaxLimit = 100,
-                            LabelsPaint = new SolidColorPaint(SKColor.Parse("#AAAAAA"))
-                        }
-                    };
+                    System.Diagnostics.Debug.WriteLine("⚠️ Нет данных для графика, создаем заглушку");
+                    HasChartData = false;
+                    StressSeries = new ISeries[0];
+                    XAxes = new Axis[0];
+                    YAxes = new Axis[0];
+                    ChartDebugText = $"Источник: {sourceCount} дней, с данными: 0. Нет заметок с заполненным StressLevel за последние 7 дней. {_stressDynamicsDebugSummary}";
+                    System.Diagnostics.Debug.WriteLine($"Analytics chart data: {ChartDebugText}");
                     return;
                 }
+
+                HasChartData = true;
+
+                var stateValues = chartData
+                    .Select(d => (double)(100 - d.Stress))
+                    .ToArray();
+
+                ChartDebugText = $"Источник: {sourceCount} дней, с данными: {realCount}, точек на графике: {stateValues.Length}, значения: {string.Join(", ", stateValues.Select(v => v.ToString("F0")))}. {_stressDynamicsDebugSummary}";
+                System.Diagnostics.Debug.WriteLine($"Analytics chart data: {ChartDebugText}");
 
                 StressSeries = new ISeries[]
                 {
                     new LineSeries<double>
                     {
-                        Values = data.Select(d => (double)d.Stress).ToArray(),
-                        GeometrySize = 9,
-                        LineSmoothness = 0.45,
+                        Values = stateValues,
+                        GeometrySize = chartData.Count == 1 ? 12 : 9,
+                        LineSmoothness = 0.4,
                         Fill = new SolidColorPaint(new SKColor(90, 79, 207, 35)),
                         Stroke = new SolidColorPaint(SKColor.Parse("#5A4FCF"), 3),
                         GeometryStroke = new SolidColorPaint(SKColor.Parse("#FFFFFF"), 2),
                         GeometryFill = new SolidColorPaint(SKColor.Parse("#5A4FCF")),
-                        Name = "Уровень стресса"
+                        Name = "Состояние"
+                    }
+                };
+
+
+                XAxes = new Axis[]
+                {
+                    new Axis
+                    {
+                        Labels = chartData.Select(d => d.DayOfWeek).ToArray(),
+                        LabelsRotation = 0,
+                        LabelsPaint = new SolidColorPaint(SKColor.Parse("#C2C2D6")),
+                        TextSize = 11,
+                        SeparatorsPaint = null,
+                        TicksPaint = new SolidColorPaint(new SKColor(255, 255, 255, 35))
+                    }
+                };
+
+
+                YAxes = new Axis[]
+                {
+                    new Axis
+                    {
+                        MinLimit = 0,
+                        MaxLimit = 100,
+                        MinStep = 20,
+                        Name = "Состояние, %",
+                        NamePaint = new SolidColorPaint(SKColor.Parse("#AAAAAA")),
+                        LabelsPaint = new SolidColorPaint(SKColor.Parse("#AAAAAA")),
+                        SeparatorsPaint = new SolidColorPaint(new SKColor(255, 255, 255, 24)),
+                        TicksPaint = new SolidColorPaint(SKColor.Parse("#555555"))
+                    }
+                };
+            
+
+                
+
+                
+                OnPropertyChanged(nameof(StressSeries));
+                OnPropertyChanged(nameof(XAxes));
+                OnPropertyChanged(nameof(YAxes));
+                
+
+                System.Diagnostics.Debug.WriteLine($"✅ График обновлен: {chartData.Count} точек");
+            }
+            catch (Exception ex)
+            {
+                HasChartData = false;
+                ChartDebugText = $"Ошибка подготовки графика: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"UpdateStressChart error: {ex}");
+
+
+
+
+                StressSeries = new ISeries[]
+                {
+                    new LineSeries<double>
+                    {
+                        Values = new double[] { 0 },
+                        GeometrySize = 0,
+                        Fill = null,
+                        Stroke = new SolidColorPaint(SKColor.Parse("#5A4FCF"), 2),
+                        Name = "Ошибка загрузки"
                     }
                 };
 
@@ -440,11 +552,8 @@ namespace Psicho_Support.ViewModels
                 {
                     new Axis
                     {
-                        Labels = data.Select(d => d.DayOfWeek).ToArray(),
-                        LabelsRotation = 0,
-                        LabelsPaint = new SolidColorPaint(SKColor.Parse("#C2C2D6")),
-                        TextSize = 11,
-                        SeparatorsPaint = null
+                        Labels = new[] { "Нет данных" },
+                        LabelsPaint = new SolidColorPaint(SKColor.Parse("#AAAAAA"))
                     }
                 };
 
@@ -454,19 +563,61 @@ namespace Psicho_Support.ViewModels
                     {
                         MinLimit = 0,
                         MaxLimit = 100,
-                        MinStep = 20,
-                        Name = "Стресс, %",
-                        NamePaint = new SolidColorPaint(SKColor.Parse("#AAAAAA")),
-                        LabelsPaint = new SolidColorPaint(SKColor.Parse("#AAAAAA")),
-                        SeparatorsPaint = new SolidColorPaint(new SKColor(255, 255, 255, 24)),
-                        TicksPaint = new SolidColorPaint(SKColor.Parse("#555555"))
+                        LabelsPaint = new SolidColorPaint(SKColor.Parse("#AAAAAA"))
                     }
                 };
             }
-            catch (Exception ex)
+        }
+
+        private string GetDayOfWeekName(DayOfWeek day)
+        {
+            switch (day)
             {
-                System.Diagnostics.Debug.WriteLine($"UpdateStressChart error: {ex.Message}");
+                case DayOfWeek.Monday: return "Пн";
+                case DayOfWeek.Tuesday: return "Вт";
+                case DayOfWeek.Wednesday: return "Ср";
+                case DayOfWeek.Thursday: return "Чт";
+                case DayOfWeek.Friday: return "Пт";
+                case DayOfWeek.Saturday: return "Сб";
+                case DayOfWeek.Sunday: return "Вс";
+                default: return day.ToString();
             }
+        }
+
+        private void ApplyPhaseVisuals(EmotionalPhase phase)
+        {
+            switch (phase)
+            {
+                case EmotionalPhase.BurnoutRisk:
+                    PhaseAccentColor = "#6FA8FF";
+                    PhaseGlowOpacity = 0.12;
+                    PhaseAnimationSpeed = 0.35;
+                    break;
+                case EmotionalPhase.Tension:
+                    PhaseAccentColor = "#7B74E8";
+                    PhaseGlowOpacity = 0.18;
+                    PhaseAnimationSpeed = 0.45;
+                    break;
+                case EmotionalPhase.Recovery:
+                    PhaseAccentColor = "#64C7B8";
+                    PhaseGlowOpacity = 0.24;
+                    PhaseAnimationSpeed = 0.65;
+                    break;
+                default:
+                    PhaseAccentColor = "#8B7CFF";
+                    PhaseGlowOpacity = 0.28;
+                    PhaseAnimationSpeed = 0.75;
+                    break;
+            }
+        }
+
+        private string BuildProfileAdvice(EmotionalProfile profile)
+        {
+            if (profile == null) return StateAdvice;
+
+            return $"Фаза: {profile.CurrentPhase} · Стабильность: {profile.StabilityIndex:F0}% · " +
+                   $"Колебания: {profile.FluctuationIndex:F0}% · Риск выгорания: {profile.BurnoutRisk:F0}%\n" +
+                   $"Почему: {profile.PredictionReason}";
         }
 
         private void UpdateStateProperties()

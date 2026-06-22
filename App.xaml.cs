@@ -91,6 +91,7 @@ namespace Psicho_Support
             services.AddSingleton<EmotionStateMachine>();
             services.AddSingleton<EmotionPredictor>();
             services.AddSingleton<EmotionBehaviorEngine>();
+            services.AddSingleton<TimelineAnalyticsService>();
 
             // Core
             services.AddSingleton<AppState>();

@@ -68,12 +68,6 @@
     <Reference Include="HarfBuzzSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>packages\HarfBuzzSharp.8.3.1.1\lib\net462\HarfBuzzSharp.dll</HintPath>
     </Reference>
-    <Reference Include="LiveCharts, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
-      <HintPath>packages\LiveCharts.0.9.7\lib\net45\LiveCharts.dll</HintPath>
-    </Reference>
-    <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
-      <HintPath>packages\LiveCharts.Wpf.0.9.7\lib\net45\LiveCharts.Wpf.dll</HintPath>
-    </Reference>
     <Reference Include="LiveChartsCore, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc92a3e13d40c573, processorArchitecture=MSIL">
       <HintPath>packages\LiveChartsCore.2.0.0\lib\net462\LiveChartsCore.dll</HintPath>
     </Reference>
@@ -204,6 +198,10 @@
     <Compile Include="Data\Users.cs">
       <DependentUpon>HealthPsichoModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Domain\Analytics.cs" />
+    <Compile Include="Domain\Behavior.cs" />
+    <Compile Include="Domain\Emotion.cs" />
+    <Compile Include="Domain\Prediction.cs" />
     <Compile Include="Enums\DialogType.cs">
       <Generator>MSBuild:Compile</Generator>
     </Compile>
@@ -213,6 +211,8 @@
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Helpers\TextEmotionAnalyzer.cs" />
     <Compile Include="Helpers\VisualTreeHelperExtensions.cs" />
+    <Compile Include="Models\EmotionalPhase.cs" />
+    <Compile Include="Models\EmotionalProfile.cs" />
     <Compile Include="Models\EmotionResult.cs" />
     <Compile Include="Models\EmotionSnapshot.cs" />
     <Compile Include="Models\EmotionState.cs" />
@@ -242,6 +242,7 @@
     <Compile Include="Services\Platform\PlatformSpecificService.cs" />
     <Compile Include="Services\SessionService.cs" />
     <Compile Include="Services\ThemeManager.cs" />
+    <Compile Include="Services\TimelineAnalyticsService.cs" />
     <Compile Include="Services\UserStateService.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ViewModels\AchievementsViewModel.cs" />

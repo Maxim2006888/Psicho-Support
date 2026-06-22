@@ -6,6 +6,7 @@ using Psicho_Support.Views;
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Psicho_Support.Views.Pages
 {
@@ -45,6 +46,18 @@ namespace Psicho_Support.Views.Pages
             _themeManager.IsDarkTheme = false;
         }
 
+        private void AmbientPlay_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = (AmbientPresetCombo.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Unknown";
+            AmbientStatusText.Text = $"Статус: включено · {selected}";
+            AmbientStatusText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B3E5FC"));
+        }
+
+        private void AmbientStop_Click(object sender, RoutedEventArgs e)
+        {
+            AmbientStatusText.Text = "Статус: выключено";
+            AmbientStatusText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E0E0E0"));
+        }
         private void Logout_Click(object sender, RoutedEventArgs e)
         {
             _session?.EndSession();
